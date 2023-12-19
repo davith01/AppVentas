@@ -1,0 +1,28 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-title>
+      Cartera Total
+    </ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content color="light" [fullscreen]="true" id="container">
+
+  <h2>Lista de clientes</h2>
+
+  <ion-searchbar show-clear-button="always" placeholder="Buscar cliente"
+    (ionInput)="findClient($event)"></ion-searchbar>
+
+  <ion-list [inset]="true" [@filterAnimation]="clientsTotal">
+    <ion-item *ngFor="let client of _clients" class="client">
+      <ion-label>{{ client.name }}</ion-label>
+    </ion-item>
+  </ion-list>
+
+   
+
+  <ion-button color="primary" (click)="goToLogin()">
+    Salir
+  </ion-button>
+
+</ion-content>
