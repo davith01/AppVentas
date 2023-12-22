@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { NavController } from '@ionic/angular';
-import { UsersService } from '../services/users.service';
+import { UsersService } from '../services/api/users.service';
 import { SynchronizeEventService } from '../services/synchronize event';
 
 @Component({

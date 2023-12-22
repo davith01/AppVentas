@@ -1,0 +1,87 @@
+.header-back-button {
+    width: 3.5rem;
+}
+
+.header-content {
+    position: absolute;
+    z-index: 100;
+    left: 3rem;
+    top: 0px;
+    width: 100%;
+}
+
+.header-content-icon {
+    width: 100%;
+    height: 100%;
+}
+
+/*Table CSS Styles*/
+.table {
+    background-color: var(--mat-table-background-color, #fff);
+    width: 100%;
+    color: rgba(0, 0, 0, 0.87);
+    font-family: Roboto, sans-serif;    
+    box-shadow: 0px 3px 14px 2px rgba(0, 0, 0, 0.12);
+}
+
+.row-head tr th,
+.row-body tr td,
+.row-foot tr th {
+    padding: 1rem 0.5rem;
+}
+
+.row-head {
+    font-size: 1rem;
+    font-weight: bold;
+    color: rgba(0, 0, 0, 0.76);
+}
+
+.column-sort {
+    display: flex;
+    justify-content: center;
+    padding-left: 0.2rem;
+}
+
+.row-body {
+    font-size: 0.9rem;
+    text-align: center;
+}
+
+.foot-cell-start {
+    text-align: left;
+    padding-left: 1rem !important;
+}
+
+.row-foot {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+    position: -webkit-sticky;
+    position: sticky;
+    top: 0px;
+    color: rgba(0, 0, 0, 0.87);
+    z-index: 10;
+    background-color: white;
+    box-shadow: 0px 0px 9px 1px rgba(0, 0, 0, 0.2);
+    font-size: 1rem;
+    font-weight: bold;
+}
+
+.row-is-clicked {
+    background-color: var(--ion-color-danger-shade);
+    color: var(--ion-color-danger-contrast);
+}
+
+.row-is-clicked .negative-value {
+    background-color: var(--ion-color-success-shade);
+    color: var(--ion-color-success-contrast);
+    font-weight: 500;
+}
+
+.negative-value {
+    color: var(--ion-color-success);
+    font-weight: 500;
+}
+
+.icon-sort {
+    padding-top: 0.1rem;
+    margin-left: 0.3rem;
+}

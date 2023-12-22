@@ -41,6 +41,7 @@ export class NetworkStatusComponent implements OnInit {
       else {
         this.animationState = 'show';
       }
+      alert(this.animationState);
       console.log(JSON.stringify(this.status));
     });
   }

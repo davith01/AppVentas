@@ -1,0 +1,88 @@
+<ion-header [translucent]="true" [translucent]="true" *ngIf="client">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button icon="caret-back" defaultHref="tabs/tab1"></ion-back-button>
+    </ion-buttons>
+    <ion-item class="header-content">
+      <ion-avatar aria-hidden="true" slot="start">
+        <img alt="" class="header-content-icon" src="/assets/corabastos-ico.png" />
+      </ion-avatar>
+      <h3>Cliente: {{client.name}} </h3>
+    </ion-item>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" *ngIf="client">
+  <table class="table">
+    <thead class="row-head">
+      <tr>
+        <th (click)="changeSort('date')">
+          <label class="column-sort"> Fecha
+            <div class="icon-sort">
+              <ion-icon name="caret-up-outline"
+                *ngIf="sortState.field == 'date' && sortState.direction == 'asc'"></ion-icon>
+              <ion-icon name="caret-down-outline"
+                *ngIf="sortState.field == 'date' && sortState.direction == 'desc'"></ion-icon>
+              <ion-icon name="none" *ngIf="sortState.field != 'date'|| sortState.direction == ''"></ion-icon>
+            </div>
+          </label>
+        </th>
+        <th (click)="changeSort('transaction')">
+          <label class="column-sort"> Transacción
+            <div class="icon-sort">
+              <ion-icon name="caret-up-outline"
+                *ngIf="sortState.field == 'transaction' && sortState.direction == 'asc'"></ion-icon>
+              <ion-icon name="caret-down-outline"
+                *ngIf="sortState.field == 'transaction' && sortState.direction == 'desc'"></ion-icon>
+              <ion-icon name="none" *ngIf="sortState.field != 'transaction'|| sortState.direction == ''"></ion-icon>
+            </div>
+          </label>
+        </th>
+        <th (click)="changeSort('quantity')">
+          <label class="column-sort"> Cantidad
+            <div class="icon-sort">
+              <ion-icon name="caret-up-outline"
+                *ngIf="sortState.field == 'quantity' && sortState.direction == 'asc'"></ion-icon>
+              <ion-icon name="caret-down-outline"
+                *ngIf="sortState.field == 'quantity' && sortState.direction == 'desc'"></ion-icon>
+              <ion-icon name="none" *ngIf="sortState.field != 'quantity'|| sortState.direction == ''"></ion-icon>
+            </div>
+          </label>
+        </th>
+        <th (click)="changeSort('price')">
+          <label class="column-sort"> Precio
+            <div class="icon-sort">
+              <ion-icon name="caret-up-outline"
+                *ngIf="sortState.field == 'price' && sortState.direction == 'asc'"></ion-icon>
+              <ion-icon name="caret-down-outline"
+                *ngIf="sortState.field == 'price' && sortState.direction == 'desc'"></ion-icon>
+              <ion-icon name="none" *ngIf="sortState.field != 'price'|| sortState.direction == ''"></ion-icon>
+            </div>
+          </label>
+        </th>
+      </tr>
+    </thead>
+    <tbody class="row-body">
+      <tr *ngFor="let element of dataClientTransaction" [ngClass]="{'row-is-clicked':clickedRows.has(element)}"
+        (click)="clickedRows.add(element)">
+        <td [ngClass]="{ 'negative-value': isNegative(element.price) }">
+          {{element.date}}</td>
+        <td [ngClass]="{ 'negative-value': isNegative(element.price) }">
+          {{element.transaction}}</td>
+        <td [ngClass]="{ 'negative-value': isNegative(element.price) }">
+          {{element.quantity}}</td>
+        <td [ngClass]="{ 'negative-value': isNegative(element.price) }">
+          {{element.price | COP}}</td>
+      </tr>
+    </tbody>
+    <tfoot class="row-foot">
+      <tr>
+        <th class="foot-cell-start" colspan="3"> Total </th>
+        <th> {{getTotalCost() | COP }} </th>
+      </tr>
+    </tfoot>
+  </table>
+
+</ion-content>
+
+<app-loading *ngIf="!client"></app-loading>

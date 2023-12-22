@@ -1,9 +1,7 @@
 <ion-content [fullscreen]="true">
 
-  <app-network-status></app-network-status>
-
   <div class="middle-box">
-    <img class="logo-icon ion-padding" src="../../../assets/icon/logo.png" />
+    <img class="logo-icon ion-padding" src="/src/assets/logo.png" />
     <h3>Bienvenido a AppVentas</h3>
     <p>Iniciar Sesión</p>
     <form class="ion-padding" novalidate [formGroup]="signinForm" (ngSubmit)="onLogin('Login',this)">

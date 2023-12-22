@@ -11,7 +11,7 @@ export class UsersService {
 
   private _storage: Storage | null = null;
 
-  constructor(private storage: Storage) {  }
+  constructor(public storage: Storage) {  }
 
   /* Token Authentication Storage */
   async init() {

@@ -29,7 +29,7 @@ ionic --version
 For clone the repository, you can using the git-Cli.
 
 ```
-git clone  
+git clone https://github.com/davith01/AppVentas.git
 ```
 
 or you can clone repository in Github Client.
