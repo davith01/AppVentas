@@ -8,12 +8,23 @@ import { merge, Observable, of as observableOf } from 'rxjs';
 import { catchError, map, startWith, switchMap } from 'rxjs/operators';
 import { MatTableDataSource } from '@angular/material/table';
 import { LiveAnnouncer } from '@angular/cdk/a11y';
+import { trigger, transition, style, animate, query, stagger } from '@angular/animations';
+
+
+export interface DetailSales {
+  date: string;
+  category: string,
+  quantity: number,
+  unitPrice: number
+}
 
 export interface ClientTransaction {
+  id: number,
   date: string;
   transaction: string;
   quantity: number;
   price: number;
+  detail?: DetailSales[]
 }
 
 export interface SortState {
@@ -22,38 +33,129 @@ export interface SortState {
 }
 
 const ELEMENT_DATA: (ClientTransaction)[] = [
-  { date: '01/01/2024', transaction: 'Saldo', quantity: 1, price: 30110000 },
-  { date: '02/01/2024', transaction: 'Abono', quantity: 1, price: -2000000 },
-  { date: '2/01/2024', transaction: 'Venta Platanos', quantity: 55, price: 90105000 },
-  { date: '03/01/2024', transaction: 'Abono', quantity: 1, price: -2000000 },
-  { date: '04/01/2024', transaction: 'Abono', quantity: 1, price: -2000000 },
-  { date: '05/01/2024', transaction: 'Venta Platanos', quantity: 85, price: 89730000 },
-  { date: '07/01/2024', transaction: 'Venta Platanos', quantity: 30, price: 94105000 },
+  { id: 1, date: '01/01/2024', transaction: 'Saldo', quantity: 1, price: 30110000 },
+  { id: 2, date: '02/01/2024', transaction: 'Abono', quantity: 1, price: -2000000 },
+  {
+    id: 3, date: '02/01/2024', transaction: 'Venta Platanos', quantity: 55, price: 90105000,
+    detail: [{
+      date: '02/01/2024',
+      category: 'Bolsas Segundas',
+      quantity: 10,
+      unitPrice: 13000
+    },
+    {
+      date: '02/01/2024',
+      category: 'Picadas',
+      quantity: 10,
+      unitPrice: 12000
+    },
+    {
+      date: '02/01/2024',
+      category: 'Buenas',
+      quantity: 10,
+      unitPrice: 13000
+    },
+    {
+      date: '02/01/2024',
+      category: 'Bolsas Segundas',
+      quantity: 30,
+      unitPrice: 15000
+    }]
+  },
+  { id: 4, date: '03/01/2024', transaction: 'Abono', quantity: 1, price: -2000000 },
+  { id: 5, date: '04/01/2024', transaction: 'Abono', quantity: 1, price: -2000000 },
+  {
+    id: 6, date: '05/01/2024', transaction: 'Venta Platanos', quantity: 85, price: 89730000,
+    detail: [{
+      date: '05/01/2024',
+      category: 'Bolsas Segundas',
+      quantity: 10,
+      unitPrice: 13000
+    },
+    {
+      date: '05/01/2024',
+      category: 'Picadas',
+      quantity: 10,
+      unitPrice: 12000
+    },
+    {
+      date: '05/01/2024',
+      category: 'Buenas',
+      quantity: 10,
+      unitPrice: 13000
+    },
+    {
+      date: '05/01/2024',
+      category: 'Segundas',
+      quantity: 40,
+      unitPrice: 18000
+    }]
+  },
+  {
+    id: 7, date: '07/01/2024', transaction: 'Venta Platanos', quantity: 30, price: 94105000,
+    detail: [{
+      date: '07/01/2024',
+      category: 'Buenas',
+      quantity: 44,
+      unitPrice: 33000
+    },
+    {
+      date: '07/01/2024',
+      category: 'Segundas',
+      quantity: 32,
+      unitPrice: 22000
+    }]
+  },
 ];
+
+
+const listAnimation = trigger('listAnimation', [
+  transition('* <=> *', [
+    query(':enter',
+      [style({ opacity: 0 }), stagger('100ms', animate('500ms ease-out', style({ opacity: 1 })))],
+      { optional: true }
+    ),
+    query(':leave',
+      animate('500ms', style({ opacity: 0 })),
+      { optional: true }
+    )
+  ])
+]);
+
+export const fadeAnimation = trigger('fadeAnimation', [
+  transition(':enter', [
+    style({ opacity: 0, height: '0', }),
+    animate('200ms ease-out', style({ opacity: 1,height: '*' }))]
+  ),
+  transition(':leave',
+    [style({ opacity: 1, height: '*' }), animate('300ms', style({ opacity: 0, height: '0', }))]
+  )
+]);
 
 @Component({
   selector: 'app-client-detail',
   templateUrl: './client-detail.page.html',
   styleUrls: ['./client-detail.page.scss'],
+  animations: [listAnimation, fadeAnimation],
 })
 export class ClientDetailPage implements OnInit {
 
   clientId: string = '';
   client: any;
 
-  //displayedColumns: string[] = ['date', 'transaction', 'quantity', 'price'];
-
-  //dataSource = new MatTableDataSource(ELEMENT_DATA);
-
   clickedRows = new Set<ClientTransaction>();
   dataClientTransaction: (ClientTransaction)[] | undefined;
   sortState: SortState = { field: 'date', direction: 'desc' };
 
-  //resultsLength = 0;
-  //isLoadingResults = true;
-  //isRateLimitReached = false;
-  //@ViewChild(MatPaginator) paginator: MatPaginator | undefined;
-  // @ViewChild('sort') sort: MatSort | undefined;
+  detailSalesSelected: number = 0;
+
+  displayedColumns: string[] = ['date', 'transaction', 'quantity', 'price'];
+  dataSource = new MatTableDataSource(ELEMENT_DATA);
+  resultsLength = 0;
+  isLoadingResults = true;
+  isRateLimitReached = false;
+  @ViewChild(MatPaginator) paginator: MatPaginator | undefined;
+  @ViewChild('sort') sort: MatSort | undefined;
   //@ViewChild(MatSort) sort: MatSort | undefined;
 
 
@@ -97,6 +199,18 @@ export class ClientDetailPage implements OnInit {
 
   isNegative(value: number): boolean {
     return value < 0;
+  }
+
+  showDetail(element: ClientTransaction) {
+    if (this.detailSalesSelected == element.id) {
+      this.detailSalesSelected = 0;
+      this.clickedRows.clear();
+    }
+    else {
+      this.detailSalesSelected = element.id;
+      this.clickedRows.clear();
+      this.clickedRows.add(element);
+    }
   }
 
   changeSort(field: string) {
