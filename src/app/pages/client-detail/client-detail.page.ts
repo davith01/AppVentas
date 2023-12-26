@@ -1,112 +1,12 @@
-import { Component, OnInit, ViewChild, AfterViewInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { MatSort, Sort } from '@angular/material/sort';
 import { ClientService } from 'src/app/services/api/clients.service';
-import { MatPaginator } from '@angular/material/paginator';
-
-import { merge, Observable, of as observableOf } from 'rxjs';
-import { catchError, map, startWith, switchMap } from 'rxjs/operators';
-import { MatTableDataSource } from '@angular/material/table';
-import { LiveAnnouncer } from '@angular/cdk/a11y';
 import { trigger, transition, style, animate, query, stagger } from '@angular/animations';
-
-
-export interface DetailSales {
-  date: string;
-  category: string,
-  quantity: number,
-  unitPrice: number
-}
-
-export interface ClientTransaction {
-  id: number,
-  date: string;
-  transaction: string;
-  quantity: number;
-  price: number;
-  detail?: DetailSales[]
-}
-
-export interface SortState {
-  direction: string;
-  field: string;
-}
-
-const ELEMENT_DATA: (ClientTransaction)[] = [
-  { id: 1, date: '01/01/2024', transaction: 'Saldo', quantity: 1, price: 30110000 },
-  { id: 2, date: '02/01/2024', transaction: 'Abono', quantity: 1, price: -2000000 },
-  {
-    id: 3, date: '02/01/2024', transaction: 'Venta Platanos', quantity: 55, price: 90105000,
-    detail: [{
-      date: '02/01/2024',
-      category: 'Bolsas Segundas',
-      quantity: 10,
-      unitPrice: 13000
-    },
-    {
-      date: '02/01/2024',
-      category: 'Picadas',
-      quantity: 10,
-      unitPrice: 12000
-    },
-    {
-      date: '02/01/2024',
-      category: 'Buenas',
-      quantity: 10,
-      unitPrice: 13000
-    },
-    {
-      date: '02/01/2024',
-      category: 'Bolsas Segundas',
-      quantity: 30,
-      unitPrice: 15000
-    }]
-  },
-  { id: 4, date: '03/01/2024', transaction: 'Abono', quantity: 1, price: -2000000 },
-  { id: 5, date: '04/01/2024', transaction: 'Abono', quantity: 1, price: -2000000 },
-  {
-    id: 6, date: '05/01/2024', transaction: 'Venta Platanos', quantity: 85, price: 89730000,
-    detail: [{
-      date: '05/01/2024',
-      category: 'Bolsas Segundas',
-      quantity: 10,
-      unitPrice: 13000
-    },
-    {
-      date: '05/01/2024',
-      category: 'Picadas',
-      quantity: 10,
-      unitPrice: 12000
-    },
-    {
-      date: '05/01/2024',
-      category: 'Buenas',
-      quantity: 10,
-      unitPrice: 13000
-    },
-    {
-      date: '05/01/2024',
-      category: 'Segundas',
-      quantity: 40,
-      unitPrice: 18000
-    }]
-  },
-  {
-    id: 7, date: '07/01/2024', transaction: 'Venta Platanos', quantity: 30, price: 94105000,
-    detail: [{
-      date: '07/01/2024',
-      category: 'Buenas',
-      quantity: 44,
-      unitPrice: 33000
-    },
-    {
-      date: '07/01/2024',
-      category: 'Segundas',
-      quantity: 32,
-      unitPrice: 22000
-    }]
-  },
-];
+import { ModalController, IonModal, AlertController, ToastController, IonPopover, IonContent } from '@ionic/angular';
+import * as moment from 'moment';
+import { TransactionDebtFormComponent } from './transaction-debt-form/transaction-debt-form.component';
+import { ClientTransaction, SortState, TransactionType } from 'src/app/model';
+import { TransactionTypeService } from 'src/app/services/api/transaction-type.service';
 
 
 const listAnimation = trigger('listAnimation', [
@@ -125,7 +25,7 @@ const listAnimation = trigger('listAnimation', [
 export const fadeAnimation = trigger('fadeAnimation', [
   transition(':enter', [
     style({ opacity: 0, height: '0', }),
-    animate('200ms ease-out', style({ opacity: 1,height: '*' }))]
+    animate('200ms ease-out', style({ opacity: 1, height: '*' }))]
   ),
   transition(':leave',
     [style({ opacity: 1, height: '*' }), animate('300ms', style({ opacity: 0, height: '0', }))]
@@ -145,55 +45,54 @@ export class ClientDetailPage implements OnInit {
 
   clickedRows = new Set<ClientTransaction>();
   dataClientTransaction: (ClientTransaction)[] | undefined;
+  dataClientTransactionOri: (ClientTransaction)[] | undefined;
   sortState: SortState = { field: 'date', direction: 'desc' };
 
   detailSalesSelected: number = 0;
 
-  displayedColumns: string[] = ['date', 'transaction', 'quantity', 'price'];
-  dataSource = new MatTableDataSource(ELEMENT_DATA);
-  resultsLength = 0;
-  isLoadingResults = true;
-  isRateLimitReached = false;
-  @ViewChild(MatPaginator) paginator: MatPaginator | undefined;
-  @ViewChild('sort') sort: MatSort | undefined;
-  //@ViewChild(MatSort) sort: MatSort | undefined;
+  @ViewChild(IonModal) modal: IonModal | undefined;
+  @ViewChild('popoverTransaction') popoverTransaction: IonPopover | undefined;
 
+
+  transactionTypes: TransactionType[] | undefined;
 
   constructor(
     public activatedRoute: ActivatedRoute,
     public clientService: ClientService,
-    private _liveAnnouncer: LiveAnnouncer) {
+    private modalController: ModalController,
+    private alertController: AlertController,
+    transactionTypeService: TransactionTypeService,
+    private toastController: ToastController) {
 
-    // Retrieve parameters from the URL
-    this.activatedRoute.queryParams.subscribe((params) => {
-      this.clientId = params['clientId'];
-      this.clientService.getClient(this.clientId)
-        .then((response: any) => {
-          this.client = response.data;
-          //this.dataSource = new MatTableDataSource<ClientTransaction>(ELEMENT_DATA)!;
-          this.dataClientTransaction = ELEMENT_DATA;
-          this.renderSort();
-        });
-
+    transactionTypeService.getList().then((data) => {
+      this.transactionTypes = data;
     });
   }
 
   ngOnInit() {
-    const m = document.querySelectorAll('ion-icon').forEach((icon: HTMLElement) => {
-      console.log(icon.shadowRoot?.childNodes[0]);
+    // Retrieve parameters from the URL
+    this.activatedRoute.queryParams.subscribe((params) => {
+
+      this.clientId = params['clientId'];
+      this.clientService.getClient(this.clientId)
+        .then((response: any) => {
+          this.client = response.data;
+        });
+
+      this.clientService.getClientTransaction(this.clientId)
+        .then((response: any) => {
+          this.dataClientTransaction = response.data;
+          this.dataClientTransactionOri = response.data;
+          this.renderSort();
+        });
+
+
     });
   }
 
-  ngAfterViewInit() {
-    /*this.sort?.sortChange.subscribe(() => {if(this.paginator) this.paginator.pageIndex = 0});
-    if (this.dataSource && this.sort) {
-      this.dataSource.sort = this.sort;
-    }*/
-  }
-
   getTotalCost() {
-    if (this.dataClientTransaction)
-      return this.dataClientTransaction.map(t => t.price).reduce((acc, value) => acc + value, 0);
+    if (this.dataClientTransactionOri)
+      return this.dataClientTransactionOri.map(t => t.price).reduce((acc, value) => acc + value, 0);
     else return 0;
   }
 
@@ -201,7 +100,7 @@ export class ClientDetailPage implements OnInit {
     return value < 0;
   }
 
-  showDetail(element: ClientTransaction) {
+  showTransactionDetail(element: ClientTransaction) {
     if (this.detailSalesSelected == element.id) {
       this.detailSalesSelected = 0;
       this.clickedRows.clear();
@@ -230,46 +129,191 @@ export class ClientDetailPage implements OnInit {
     }
     this.renderSort();
   }
-
   renderSort() {
-    if (this.sortState.direction != '') {
+    const { direction, field } = this.sortState;
 
-      this.dataClientTransaction = ELEMENT_DATA;
+    if (direction !== '') {
+      const sortFunction = (a: any, b: any) => {
+        if (field === 'date') {
+          const dateA = moment(a.date, 'DD/MM/YYYY');
+          const dateB = moment(b.date, 'DD/MM/YYYY');
+          return direction === 'asc' ? dateA.isAfter(dateB) ? 1 : -1 : dateB.isAfter(dateA) ? 1 : -1;
+        } else if (field === 'price' || field === 'quantity') {
+          return direction === 'asc' ? a[field] - b[field] : b[field] - a[field];
+        } else if (field === 'transaction') {
+          return direction === 'asc' ? a[field].localeCompare(b[field]) : b[field].localeCompare(a[field]);
+        }
+      };
 
-      if (this.sortState.field == 'date') {
-        this.dataClientTransaction = ELEMENT_DATA;
-        this.dataClientTransaction.sort((a, b) => {
-          const dateA = new Date(a.date);
-          const dateB = new Date(b.date);
-          if (this.sortState.direction == 'asc') {
-            return dateA.getTime() - dateB.getTime();
-          }
-          else { return dateB.getTime() - dateA.getTime(); }
-        });
-      }
-      else if (this.sortState.field == 'price') {
-        this.dataClientTransaction.sort((a: ClientTransaction, b: ClientTransaction) => {
-          if (this.sortState.direction == 'asc') {
-            return a.price - b.price;
-          } else { return b.price - a.price; }
-        });
-      }
-      else if (this.sortState.field == 'quantity') {
-        this.dataClientTransaction.sort((a: ClientTransaction, b: ClientTransaction) => {
-          if (this.sortState.direction == 'asc') {
-            return a.quantity - b.quantity;
-          } else { return b.quantity - a.quantity; }
-        });
-      }
-      else if (this.sortState.field == 'transaction') {
-        this.dataClientTransaction.sort((a: any, b: any) => {
-          if (this.sortState.direction == 'asc') {
-            return a.transaction > b.transaction ? 1 : -1;
-          } else { return a.transaction > b.transaction ? -1 : 1; }
-        });
-      }
+      this.dataClientTransaction?.sort(sortFunction);
     } else {
-      this.dataClientTransaction = ELEMENT_DATA;
+      this.dataClientTransaction = this.dataClientTransactionOri;
+    }
+  }
+
+
+
+  showDateFilter = false;
+  filterDate = '';
+  dateFilterStart: any;
+  dateFilterEnd: any;
+
+  confirmDateFilter() {
+
+    this.dataClientTransaction = this.dataClientTransactionOri?.filter((element => {
+
+      if (this.dateFilterStart) {
+        const dateItem = moment(element.date, 'DD/MM/YYYY');
+
+        if (this.dateFilterEnd) {
+          return dateItem >= this.dateFilterStart && dateItem <= this.dateFilterEnd;
+        }
+        else {
+          return dateItem >= this.dateFilterStart;
+        }
+      }
+      else return true;
+    }));
+
+    this.renderSort();
+  }
+
+  clearDateFilter() {
+    this.dateFilterEnd = null;
+    this.dateFilterStart = null;
+    this.confirmDateFilter();
+  }
+
+  async openModalPay() {
+    const alert = await this.alertController.create({
+      header: 'Formulario de Alerta',
+      inputs: [
+        {
+          name: 'transactionType',
+          type: 'text',
+          placeholder: 'Tipo de Transacción'
+        },
+        {
+          name: 'transactionDate',
+          type: 'date',
+          placeholder: 'Fecha de Transacción'
+        },
+        {
+          name: 'amount',
+          type: 'number',
+          placeholder: 'Monto'
+        },
+        {
+          name: 'paymentMethod',
+          type: 'text',
+          placeholder: 'Método de Pago'
+        },
+      ],
+      buttons: [
+        {
+          text: 'Cancelar',
+          role: 'cancel',
+          handler: () => {
+            console.log('Cancelado');
+          }
+        },
+        {
+          text: 'Guardar',
+          handler: (data) => {
+            console.log('Datos guardados:', data);
+            // Aquí puedes realizar acciones con los datos del formulario
+          }
+        }
+      ]
+    });
+
+    await alert.present();
+  }
+
+  async openModalDebt() {
+    const modal = await this.modalController.create({
+      component: TransactionDebtFormComponent, // Reemplaza TuModalComponent con el nombre real de tu componente modal
+      componentProps: {
+
+      },
+      cssClass: 'modal-transaction-form',
+      /*backdropDismiss: false*/
+    });
+
+    await modal.present();
+
+    const { data } = await modal.onDidDismiss();
+
+    // Este código se ejecuta cuando el modal se cierra
+    if (data) {
+      console.log('Modal cerrado con datos:', data);
+      //data.amount *= -1;
+      this.addTransacction(data);
+    }
+  }
+
+  addTransacction(data: any) {
+
+    const transactionIdToFind = data.transactionType;
+    const transactionType = this.transactionTypes?.find(type => type.id === transactionIdToFind);
+
+    const transactionDate = moment(data.transactionDate).format('DD/MM/YYYY');
+
+    //se adicionan los datos al arreglo de transacciones
+    const element: ClientTransaction = {
+      id: this.dataClientTransactionOri ? this.dataClientTransactionOri.length + 1 : 1,
+      date: transactionDate,
+      transaction: transactionType ? transactionType.name : '',
+      quantity: data.quantity,
+      price: data.amount,
+      syncRequired: true,
+      paymentMethod: data.paymentMethod
+    }
+    this.dataClientTransactionOri?.push(element);
+    this.closePopover();
+    this.presentToast('top', 'Registro adicionado exitosamente');
+    this.renderSort();
+    this.showTransactionDetail(element);
+    setTimeout(() => {
+      this.showElementInTable(element);
+    }, 500);
+
+  }
+
+  closeModalPlay() {
+    this.modalController.dismiss();
+  }
+
+
+  async presentToast(position: 'top' | 'middle' | 'bottom', message: string) {
+    const toast = await this.toastController.create({
+      message: message,
+      duration: 1500,
+      position: position,
+    });
+
+    await toast.present();
+  }
+
+  closePopover() {
+    if (this.popoverTransaction) {
+      this.popoverTransaction.dismiss();
+    }
+  }
+
+  @ViewChild(IonContent, { static: false }) content: IonContent | undefined;
+
+  showElementInTable(element: ClientTransaction) {
+    // Realiza las acciones necesarias antes de mostrar el detalle
+
+    // Desplaza el scroll hacia el elemento específico
+    if (this.content) {
+      const elementId = `table-id-${element.id}`;
+      const tableElement = document.getElementById(elementId);
+
+      if (tableElement) {
+        this.content.scrollToPoint(0, tableElement.offsetTop, 500);
+      }
     }
   }
 }

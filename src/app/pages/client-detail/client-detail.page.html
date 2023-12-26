@@ -7,15 +7,81 @@
       <ion-avatar aria-hidden="true" slot="start">
         <img alt="" class="header-content-icon" src="/assets/corabastos-ico.png" />
       </ion-avatar>
-      <h3>Cliente: {{client.name}} </h3>
+      <h3>Cliente: {{client?.name}} </h3>
     </ion-item>
   </ion-toolbar>
 </ion-header>
 
 <ion-content color="light" [fullscreen]="true" *ngIf="client">
-  <h5 class="ion-text-center">Grid table</h5>
-  <ion-grid [fixed]="true" class="table">
 
+  <!--Action Buttons-->
+  <ion-button class="button-new" fill="clear" size="small" id="click-trigger">
+    <ion-icon slot="icon-only" name="add-circle-outline"></ion-icon>
+  </ion-button>
+  <ion-popover #popoverTransaction trigger="click-trigger" class="popover-actions" triggerAction="click">
+    <ng-template>
+      <ion-content class="ion-padding popover-actions-content">
+        <ion-list>
+          <ion-item [button]="true" [detail]="false" (click)="openModalPay()">
+            <ion-label>Pago/Abono</ion-label>
+            <ion-icon slot="end" name="cash-outline"></ion-icon>
+          </ion-item>
+          <ion-item [button]="true" [detail]="false" (click)="openModalDebt()">
+            <ion-label>Deuda/Venta</ion-label>
+            <ion-icon slot="end" name="wallet-outline"></ion-icon>
+          </ion-item>
+        </ion-list>
+      </ion-content>
+    </ng-template>
+  </ion-popover>
+
+  <!--Filters -->
+  <div class="open-filter-modal" (click)="showDateFilter = !showDateFilter">
+    <ion-icon name="funnel-outline" class="filter-icon"></ion-icon>
+    <ion-icon [name]="showDateFilter ? 'caret-down-outline' : 'caret-forward-outline'"></ion-icon>
+    <div *ngIf="!showDateFilter">
+      {{ dateFilterStart ? 'Desde ': ''}}
+      {{ dateFilterStart | Fecha }} <ion-icon name="calendar-outline" *ngIf="dateFilterStart"></ion-icon>
+      {{ dateFilterEnd ? ' - Hasta ': '' }}
+      {{ dateFilterEnd | Fecha }} <ion-icon name="calendar-outline" *ngIf="dateFilterEnd"></ion-icon> </div>
+  </div>
+  <div *ngIf="showDateFilter">
+    <ion-grid class="date-filter-content">
+      <ion-row>
+        <ion-col>
+          <mat-form-field color="accent">
+            <mat-label>Fecha inicial</mat-label>
+            <input matInput [matDatepicker]="picker1" [(ngModel)]="dateFilterStart">
+            <mat-hint>DD/MM/YYYY</mat-hint>
+            <mat-datepicker-toggle matIconSuffix [for]="picker1"></mat-datepicker-toggle>
+            <mat-datepicker #picker1></mat-datepicker>
+          </mat-form-field>
+        </ion-col>
+        <ion-col>
+          <mat-form-field color="accent">
+            <mat-label>Fecha final</mat-label>
+            <input matInput [matDatepicker]="picker2" [(ngModel)]="dateFilterEnd">
+            <mat-hint>DD/MM/YYYY</mat-hint>
+            <mat-datepicker-toggle matIconSuffix [for]="picker2"></mat-datepicker-toggle>
+            <mat-datepicker #picker2></mat-datepicker>
+          </mat-form-field>
+        </ion-col>
+      </ion-row>
+      <div class="close-date-filter" (click)="showDateFilter = false">
+        <ion-button size="small" color="medium" (click)="showDateFilter = true">
+          Cancelar
+        </ion-button>
+        <ion-button size="small" color="primary" (click)="confirmDateFilter()">
+          Aceptar
+        </ion-button>
+        <ion-button class="clear-date-filter" size="small" fill="clear" color="primary" (click)="clearDateFilter()">
+          <ion-icon slot="icon-only" name="trash-bin-outline"></ion-icon>
+        </ion-button>
+      </div>
+    </ion-grid>
+  </div>
+
+  <ion-grid [fixed]="true" class="table">
     <!--Head Table-->
     <ion-row class="row-head">
       <ion-col (click)="changeSort('date')">
@@ -24,8 +90,7 @@
             <ion-icon name="caret-up-outline"
               *ngIf="sortState.field == 'date' && sortState.direction == 'asc'"></ion-icon>
             <ion-icon name="caret-down-outline"
-              *ngIf="sortState.field == 'date' && sortState.direction == 'desc'"></ion-icon>
-            <ion-icon name="none" *ngIf="sortState.field != 'date'|| sortState.direction == ''"></ion-icon>
+              [ngStyle]="{'opacity': ( sortState.field == 'date' && sortState.direction == 'desc' ) ? '1' : '0' }"></ion-icon>
           </div>
         </label>
       </ion-col>
@@ -35,8 +100,7 @@
             <ion-icon name="caret-up-outline"
               *ngIf="sortState.field == 'transaction' && sortState.direction == 'asc'"></ion-icon>
             <ion-icon name="caret-down-outline"
-              *ngIf="sortState.field == 'transaction' && sortState.direction == 'desc'"></ion-icon>
-            <ion-icon name="none" *ngIf="sortState.field != 'transaction'|| sortState.direction == ''"></ion-icon>
+              [ngStyle]="{'opacity': ( sortState.field == 'transaction' && sortState.direction == 'desc' ) ? '1' : '0' }"></ion-icon>
           </div>
         </label>
       </ion-col>
@@ -46,8 +110,7 @@
             <ion-icon name="caret-up-outline"
               *ngIf="sortState.field == 'quantity' && sortState.direction == 'asc'"></ion-icon>
             <ion-icon name="caret-down-outline"
-              *ngIf="sortState.field == 'quantity' && sortState.direction == 'desc'"></ion-icon>
-            <ion-icon name="none" *ngIf="sortState.field != 'quantity'|| sortState.direction == ''"></ion-icon>
+              [ngStyle]="{'opacity': ( sortState.field == 'quantity' && sortState.direction == 'desc' ) ? '1' : '0' }"></ion-icon>
           </div>
         </label>
       </ion-col>
@@ -57,8 +120,7 @@
             <ion-icon name="caret-up-outline"
               *ngIf="sortState.field == 'price' && sortState.direction == 'asc'"></ion-icon>
             <ion-icon name="caret-down-outline"
-              *ngIf="sortState.field == 'price' && sortState.direction == 'desc'"></ion-icon>
-            <ion-icon name="none" *ngIf="sortState.field != 'price'|| sortState.direction == ''"></ion-icon>
+              [ngStyle]="{'opacity': ( sortState.field == 'price' && sortState.direction == 'desc' ) ? '1' : '0' }"></ion-icon>
           </div>
         </label>
       </ion-col>
@@ -66,9 +128,10 @@
 
     <!--Body Table-->
     <ng-container *ngFor="let element of dataClientTransaction">
-      <ion-row class="row-body" [ngClass]="{'row-is-clicked':clickedRows.has(element)}" (click)="showDetail(element)">
-        <ion-col [ngClass]="{ 'negative-value': isNegative(element.price) }">
-          {{element.date}}
+      <ion-row class="row-body" [ngClass]="{'syncRequired':element.syncRequired, 'row-is-clicked':clickedRows.has(element)}"
+        (click)="showTransactionDetail(element)">
+        <ion-col id="table-id-{{element.id}}" [ngClass]="{ 'negative-value': isNegative(element.price) }">
+          {{element.date }}
         </ion-col>
         <ion-col [ngClass]="{ 'negative-value': isNegative(element.price) }">
           {{element.transaction}}
@@ -81,166 +144,41 @@
         </ion-col>
       </ion-row>
       <!--Detail Sales-->
-      <section class="detail-section"
-      @fadeAnimation *ngIf="element.detail && element.detail.length>0 && detailSalesSelected == element.id">
+      <section class="detail-section" @fadeAnimation
+        *ngIf="element.detail && element.detail.length>0 && detailSalesSelected == element.id">
         <ion-row class="detail-sales-head">
           <ion-col>Categoría</ion-col>
           <ion-col>Cantidad</ion-col>
           <ion-col>Precio Unitario</ion-col>
           <ion-col>Subtotal</ion-col>
-        </ion-row> 
-          <ion-row class="detail-sales-body" *ngFor="let detail of element.detail">
-            <ion-col> {{detail.category}} </ion-col>
-            <ion-col> {{detail.quantity }} </ion-col>
-            <ion-col> {{detail.unitPrice}} </ion-col>
-            <ion-col> {{detail.unitPrice * detail.quantity }} </ion-col>
-          </ion-row> 
+        </ion-row>
+        <ion-row class="detail-sales-body" *ngFor="let detail of element.detail">
+          <ion-col> {{detail.category}} </ion-col>
+          <ion-col> {{detail.quantity }} </ion-col>
+          <ion-col> {{detail.unitPrice  | COP }} </ion-col>
+          <ion-col> {{ ( detail.unitPrice * detail.quantity )  | COP}} </ion-col>
+        </ion-row>
       </section>
 
     </ng-container>
 
+    <!--No data -->
+    <ion-row *ngIf="dataClientTransaction?.length == 0">
+      <label *ngIf="!dateFilterEnd && !dateFilterStart">
+        No hay datos para el cliente
+      </label>
+      <label *ngIf="dateFilterEnd || dateFilterStart">
+        No hay datos para el cliente para estas fechas
+      </label>
+    </ion-row>
+
     <!--Foot Table-->
     <ion-row class="row-foot">
-      <ion-col class="foot-cell-start">Total</ion-col>
+      <ion-col class="foot-cell-start">Saldo Total</ion-col>
       <ion-col size="auto">{{getTotalCost() | COP }}</ion-col>
     </ion-row>
 
   </ion-grid>
-
-  <h5 class="ion-text-center">HTML Table</h5>
-
-  <ion-item>
-    <table class="table">
-      <thead class="row-head">
-        <tr>
-          <th (click)="changeSort('date')">
-            <label class="column-sort"> Fecha
-              <div class="icon-sort">
-                <ion-icon name="caret-up-outline"
-                  *ngIf="sortState.field == 'date' && sortState.direction == 'asc'"></ion-icon>
-                <ion-icon name="caret-down-outline"
-                  *ngIf="sortState.field == 'date' && sortState.direction == 'desc'"></ion-icon>
-                <ion-icon name="none" *ngIf="sortState.field != 'date'|| sortState.direction == ''"></ion-icon>
-              </div>
-            </label>
-          </th>
-          <th (click)="changeSort('transaction')">
-            <label class="column-sort"> Transacción
-              <div class="icon-sort">
-                <ion-icon name="caret-up-outline"
-                  *ngIf="sortState.field == 'transaction' && sortState.direction == 'asc'"></ion-icon>
-                <ion-icon name="caret-down-outline"
-                  *ngIf="sortState.field == 'transaction' && sortState.direction == 'desc'"></ion-icon>
-                <ion-icon name="none" *ngIf="sortState.field != 'transaction'|| sortState.direction == ''"></ion-icon>
-              </div>
-            </label>
-          </th>
-          <th (click)="changeSort('quantity')">
-            <label class="column-sort"> Cantidad
-              <div class="icon-sort">
-                <ion-icon name="caret-up-outline"
-                  *ngIf="sortState.field == 'quantity' && sortState.direction == 'asc'"></ion-icon>
-                <ion-icon name="caret-down-outline"
-                  *ngIf="sortState.field == 'quantity' && sortState.direction == 'desc'"></ion-icon>
-                <ion-icon name="none" *ngIf="sortState.field != 'quantity'|| sortState.direction == ''"></ion-icon>
-              </div>
-            </label>
-          </th>
-          <th (click)="changeSort('price')">
-            <label class="column-sort"> Precio
-              <div class="icon-sort">
-                <ion-icon name="caret-up-outline"
-                  *ngIf="sortState.field == 'price' && sortState.direction == 'asc'"></ion-icon>
-                <ion-icon name="caret-down-outline"
-                  *ngIf="sortState.field == 'price' && sortState.direction == 'desc'"></ion-icon>
-                <ion-icon name="none" *ngIf="sortState.field != 'price'|| sortState.direction == ''"></ion-icon>
-              </div>
-            </label>
-          </th>
-        </tr>
-      </thead>
-      <tbody class="row-body">
-        <tr *ngFor="let element of dataClientTransaction" [ngClass]="{'row-is-clicked':clickedRows.has(element)}"
-          (click)="clickedRows.add(element)">
-          <td [ngClass]="{ 'negative-value': isNegative(element.price) }">
-            {{element.date}}</td>
-          <td [ngClass]="{ 'negative-value': isNegative(element.price) }">
-            {{element.transaction}}</td>
-          <td [ngClass]="{ 'negative-value': isNegative(element.price) }">
-            {{element.quantity}}</td>
-          <td [ngClass]="{ 'negative-value': isNegative(element.price) }">
-            {{element.price | COP}}</td>
-        </tr>
-      </tbody>
-      <tfoot class="row-foot">
-        <tr>
-          <th class="foot-cell-start" colspan="3"> Total </th>
-          <th> {{getTotalCost() | COP }} </th>
-        </tr>
-      </tfoot>
-    </table>
-  </ion-item>
-
-  <h5 class="ion-text-center">Angular Material table</h5>
-
-  <table mat-table [dataSource]="dataSource" matSort class="mat-elevation-z8">
-
-    <!--  Column -->
-    <ng-container matColumnDef="date">
-      <th mat-header-cell *matHeaderCellDef mat-sort-header sortActionDescription="Ordenar por Fecha">
-        Fecha
-      </th>
-      <td mat-cell *matCellDef="let element" [ngClass]="{ 'negative-value': isNegative(element.price) }">
-        {{ element.date }}</td>
-      <td mat-footer-cell *matFooterCellDef> Total </td>
-    </ng-container>
-
-
-    <!-- Column -->
-    <ng-container matColumnDef="transaction">
-      <th mat-header-cell *matHeaderCellDef mat-sort-header sortActionDescription="Ordenar por Unidad">
-        Unidad</th>
-      <td mat-cell *matCellDef="let element" [ngClass]="{ 'negative-value': isNegative(element.price) }">
-        {{element.transaction}}</td>
-      <td mat-footer-cell *matFooterCellDef> </td>
-    </ng-container>
-
-    <!-- Column -->
-    <ng-container matColumnDef="quantity">
-      <th mat-header-cell *matHeaderCellDef mat-sort-header sortActionDescription="Ordenar por Cantidad">
-        Cantidad</th>
-      <td mat-cell *matCellDef="let element" [ngClass]="{ 'negative-value': isNegative(element.price) }">
-        {{element.quantity}}</td>
-      <td mat-footer-cell *matFooterCellDef> </td>
-    </ng-container>
-
-    <!-- Column -->
-    <ng-container matColumnDef="price">
-      <th mat-header-cell *matHeaderCellDef mat-sort-header sortActionDescription="Ordenar por Precio">
-        Precio</th>
-      <td mat-cell *matCellDef="let element" [ngClass]="{ 'negative-value': isNegative(element.price) }">
-        {{element.price | COP}}</td>
-      <td mat-footer-cell *matFooterCellDef> {{getTotalCost() | COP }} </td>
-      <td mat-footer-cell *matFooterCellDef> </td>
-    </ng-container>
-
-    <!-- GroupHeader ->
-<ng-container matColumnDef="groupHeader">
-  <mat-cell *matCellDef="let group">{{group.group}}</mat-cell>
-</ng-container>
--->
-
-    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-    <tr mat-row *matRowDef="let row; columns: displayedColumns;" (click)="clickedRows.add(row)"
-      [class.demo-row-is-clicked]="clickedRows.has(row)"></tr>
-    <tr mat-footer-row *matFooterRowDef="displayedColumns; sticky: true"></tr>
-
-    <tr class="mat-row" *matNoDataRow>
-      <td class="mat-cell" colspan="4">No hay datos aun</td>
-    </tr>
-    <!--tr mat-row *matRowDef="let row; columns: ['groupHeader']; when: isGroup"> </tr>-->
-
-  </table>
 
 </ion-content>
 

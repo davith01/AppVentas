@@ -1,0 +1,44 @@
+[
+    {
+        "id": 1,
+        "name": "Venta de Platanos",
+        "typeTransaction": "Debt",
+        "icon": "add-circle"
+    },
+    {
+        "id": 2,
+        "name": "Gasto",
+        "typeTransaction": "Debt",
+        "icon": "remove-circle"
+    },
+    {
+        "id": 3,
+        "name": "Transferencia",
+        "typeTransaction": "Debt",
+        "icon": "swap-horizontal"
+    },
+    {
+        "id": 4,
+        "name": "Pago",
+        "typeTransaction": "Credit",
+        "icon": "cash"
+    },
+    {
+        "id": 5,
+        "name": "Préstamo",
+        "typeTransaction": "Debt",
+        "icon": "card"
+    },
+    {
+        "id": 6,
+        "name": "Devolución de Productos",
+        "typeTransaction": "Credit",
+        "icon": "arrow-back-circle"
+    },
+    {
+        "id": 7,
+        "name": "Ingreso de Salario",
+        "typeTransaction": "Credit",
+        "icon": "wallet"
+    }
+]

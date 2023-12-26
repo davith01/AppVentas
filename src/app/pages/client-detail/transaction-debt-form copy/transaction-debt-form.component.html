@@ -1,0 +1,108 @@
+<ion-content class="ion-padding">
+  <ion-header class="ion-no-border">
+    <ion-toolbar>
+      <ion-title class="ion-text-center">Formulario de Transacción</ion-title>
+    </ion-toolbar>
+  </ion-header>
+
+  <form [formGroup]="transactionForm">
+    <ion-list>
+      <ion-item>
+        <ion-select interface="popover" placeholder="" label="Tipo de Transacción" formControlName="transactionType"
+          label-placement="floating" fill="outline">
+          <ion-select-option [value]="type.id" *ngFor="let type of transactionTypes">
+            {{type.name}}
+          </ion-select-option>
+        </ion-select>
+      </ion-item>
+
+      <!--ion-item>
+        <ion-label>Tipo de Transacción</ion-label>
+        <ion-breadcrumbs>
+          <ion-breadcrumb (click)="selectType(type)" *ngFor="let type of transactionTypes">
+            <ion-icon slot="start" [name]="type.icon"></ion-icon>
+            {{type.name}}
+          </ion-breadcrumb>
+        </ion-breadcrumbs>
+      </ion-item-->
+
+
+      <ion-item lines="none">
+        <ion-label>Fecha de Transacción</ion-label>
+      </ion-item>
+      <ion-item>
+        <ion-datetime presentation="date" formControlName="transactionDate"></ion-datetime>
+      </ion-item>
+      
+      <!--ion-item *ngIf="showDateTransaction">
+        <ion-datetime presentation="date" (ionChange)="closeDateTransaction($event)"></ion-datetime>
+      </ion-item>
+      <ion-item *ngIf="!showDateTransaction">
+        <ion-datetime-button datetime="datetime"></ion-datetime-button>
+        <ion-modal [keepContentsMounted]="true">
+          <ng-template>
+            <ion-datetime (ionChange)="changeDateTransaction($event)" presentation="date" id="datetime"></ion-datetime>
+          </ng-template>
+        </ion-modal>
+      </ion-item-->
+
+
+
+      <!--ion-item lines="none">
+        <ion-label>Fecha de Transacción</ion-label>
+      </ion-item>
+      <ion-item>
+        <ion-datetime presentation="date"></ion-datetime>
+      </ion-item>
+
+      <ion-item lines="none">
+        <ion-label>Fecha de Transacción 2</ion-label>
+      </ion-item>
+      
+      <ion-item>
+        <ion-datetime-button datetime="datetime"></ion-datetime-button>
+
+        <ion-modal [keepContentsMounted]="true">
+          <ng-template>
+            <ion-datetime presentation="date" id="datetime"></ion-datetime>
+          </ng-template>
+        </ion-modal>
+      </ion-item-->
+
+      <!--ion-item lines="none">
+        <ion-label>Fecha de Transacción</ion-label>
+      </ion-item>
+      <ion-item>
+        <mat-card class="demo-inline-calendar-card">
+          <mat-calendar [(selected)]="transactionDate"></mat-calendar>
+        </mat-card>
+      </ion-item-->
+
+      <ion-item>
+        <ion-input label="Cantidad" type="number" formControlName="quantity"></ion-input>
+      </ion-item>
+
+      <ion-item>
+        <ion-input class="monto-input" id="monto" label="Monto" label-placement="floating" fill="outline"
+          appCurrencyFormat="COP" type="number" formControlName="amount"></ion-input>
+
+        <ion-label [ngStyle]="{'opacity': amount > 0 ? '1' : 0 }"> 
+            {{amount > 0 ? (amount | COP) : '  $ ' }} 
+        </ion-label>
+      </ion-item>
+
+      <ion-item>
+        <ion-select interface="popover" placeholder="" label="Método de Pago" formControlName="paymentMethod">
+          <ion-select-option value="efectivo">Efectivo</ion-select-option>
+          <ion-select-option value="tarjeta">Tarjeta</ion-select-option>
+          <!-- Agrega más opciones según sea necesario -->
+        </ion-select>
+      </ion-item>
+      <ion-item>
+        <ion-button expand="full" color="success" [disabled]="!transactionForm.valid" (click)="submitForm()">Registrar
+          Transacción</ion-button>
+        <ion-button expand="small" color="medium" (click)="cancel()">Cancelar</ion-button>
+      </ion-item>
+    </ion-list>
+  </form>
+</ion-content>

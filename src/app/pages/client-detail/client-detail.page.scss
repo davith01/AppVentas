@@ -32,7 +32,7 @@ ion-col,
 }
 
 .row-head {
-    font-size: 1rem;
+    font-size: 0.9rem;
     font-weight: bold;
     color: rgba(0, 0, 0, 0.76);
 }
@@ -40,7 +40,6 @@ ion-col,
 .column-sort {
     display: flex;
     justify-content: center;
-    padding-left: 0.2rem;
 }
 
 .row-body {
@@ -65,6 +64,12 @@ ion-col,
     box-shadow: 0px 0px 9px 1px rgba(0, 0, 0, 0.2);
     font-size: 1rem;
     font-weight: bold;
+}
+
+.syncRequired{
+    border: 2px solid var(--ion-color-warning);
+    border-style: dashed;
+    background-color: rgb(255, 202, 34, 0.5);
 }
 
 .row-is-clicked {
@@ -103,9 +108,84 @@ ion-col,
 }
 
 .detail-sales-body:last-child {
-    border-bottom: 2px solid orange;
+    border-bottom: 2px solid var(--ion-color-danger-shade);
 }
 
 .detail-section {
     overflow: hidden;
+    border-left: 3px solid var(--ion-color-danger-shade);
+}
+
+.open-filter-modal {
+    display: flex;
+    color: gray;
+}
+
+.filter-icon {
+    font-size: 1.4rem;
+    margin-bottom: 0.5rem;
+    margin-left: 0.5rem;
+    margin-right: 0.3rem;
+}
+
+.close-date-filter {
+    text-align: center;
+}
+
+.date-filter-content {
+    border: 1px solid gray;
+    margin: 9px;
+    border-radius: 16px;
+}
+
+mat-hint {
+    font-size: 0.8rem;
+}
+
+mat-form-field {
+    width: 11rem;
+}
+
+.clear-date-filter {
+    margin-left: 3rem;
+}
+
+.button-new {
+    position: relative;
+    left: calc(100% - 5rem);
+    top: 0.5rem;
+    font-size: 1.25rem;
+}
+
+ion-content.popover-actions-content::part(background) {
+    border-radius: 7px;
+}
+
+ion-content.popover-actions-content,
+ion-content.popover-actions-content::part(scroll) {
+    background: transparent;
+}
+
+ion-popover.popover-actions::part(content) {
+    box-shadow: none;
+    --background: transparent;
+    padding-top: 15px;
+}
+
+ion-popover.popover-actions::part(content)::before {
+    content: "";
+    position: absolute;
+    top: 2px;
+    right: 1rem;
+    border-style: solid;
+    border-width: 16px 12px 0;
+    border-color: white transparent;
+    display: block;
+    width: 0;
+    z-index: 1;
+    transform: rotateX(180deg);
+}
+
+.with_0{
+    width: 0;;
 }
