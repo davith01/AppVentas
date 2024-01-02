@@ -3,25 +3,29 @@
         "id": 1,
         "name": "Venta de Platanos",
         "typeTransaction": "Debt",
-        "icon": "add-circle"
+        "icon": "add-circle",
+        "detail": true
     },
     {
         "id": 2,
         "name": "Gasto",
         "typeTransaction": "Debt",
-        "icon": "remove-circle"
+        "icon": "remove-circle",
+        "detail": false
     },
     {
         "id": 3,
         "name": "Transferencia",
         "typeTransaction": "Debt",
-        "icon": "swap-horizontal"
+        "icon": "swap-horizontal",
+        "detail": true
     },
     {
         "id": 4,
         "name": "Pago",
         "typeTransaction": "Credit",
-        "icon": "cash"
+        "icon": "cash",
+        "detail": false
     },
     {
         "id": 5,

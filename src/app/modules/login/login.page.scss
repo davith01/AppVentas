@@ -1,0 +1,55 @@
+.logo-icon {
+    margin: 0 auto;
+    width: 6rem;
+    border-radius: 33px;
+}
+
+.middle-box {
+    margin: 0 auto;
+    text-align: center;
+    padding-top: 1rem;
+}
+
+.item-box {
+    margin-bottom: 1rem;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.btn-primary {
+    background-color: #1ab394;
+    border-color: #1ab394;
+    color: #FFFFFF;
+    height: 50px;
+}
+
+h3 {
+    margin: 0 auto;
+    line-height: 1.1;
+    margin-top: 5px;
+}
+
+.error-message {
+    color: red;
+    font-size: 0.8rem;
+}
+
+.google-icon::part(native) {
+    padding: 1.3rem;
+    border-radius: 0.6rem;
+}
+
+.google-icon img {
+    width: 50px;
+    height: 30px;
+}
+
+.finger-print {
+    ion-button {
+        --padding-bottom: 1.4rem;
+        --padding-end: .5rem;
+        --padding-start: .5rem;
+        --padding-top: 1.4rem;
+        font-size: 1rem;
+    }
+}

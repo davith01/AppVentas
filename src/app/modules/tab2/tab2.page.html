@@ -1,0 +1,26 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+      <ion-title>Clientes</ion-title>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" color="light">
+
+  <div *ngFor="let item of list">
+    <ion-card>
+      <ion-card-header>
+        Cliente {{item}}
+      </ion-card-header>
+      <ion-card-content>
+        {{item}}
+      </ion-card-content>
+    </ion-card>
+  </div>
+  <ion-infinite-scroll position="bottom" (ionInfinite)="loadMore($event)" threshold="30%">
+    <ion-infinite-scroll-content loadingSpinner="crescent" loadingText="Loading more data...">
+    </ion-infinite-scroll-content>
+  </ion-infinite-scroll>
+</ion-content>

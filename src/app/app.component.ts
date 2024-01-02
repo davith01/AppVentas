@@ -1,28 +1,15 @@
-import { Component } from '@angular/core';
+import { Component, NgZone } from '@angular/core';
+import { FirebaseAuthenticationService } from './core';
+import { animate, state, style, transition, trigger } from '@angular/animations';
 import { AlertController, NavController } from '@ionic/angular';
-import { UsersService } from './services/api/users.service';
-import { PageSelectedEventService } from './services/page-selected-events';
+import { StorageService } from './services';
 import { ConnectionStatus, Network } from '@capacitor/network';
-import { trigger, state, style, animate, transition } from '@angular/animations';
 
 @Component({
   selector: 'app-root',
   templateUrl: 'app.component.html',
   styleUrls: ['app.component.scss'],
   animations: [
-    trigger('banner-state', [
-      state('show', style({
-        display: 'block',
-        height: '*',
-      })),
-      state('hidden', style({
-        opacity: '0',
-        display: 'none',
-        height: '0px',
-      })),
-      transition('show => hidden', animate('5000ms ease-in-out')),
-      transition('hidden => show', animate('1000ms ease-in-out')),
-    ]),
     trigger('router-outlet', [
       state('show', style({
         top: '2.5rem',
@@ -38,49 +25,32 @@ import { trigger, state, style, animate, transition } from '@angular/animations'
 export class AppComponent {
 
   pageSelected: string = '';
-  networkStatus: boolean = false;
   animationState: String = 'hidden';
-  animationStateRouter: String = 'hidden';
+  networkStatus: boolean = false;
 
   constructor(
-    private usersService: UsersService,
-    private navCtrl: NavController,
-    private pageSelectedEvent: PageSelectedEventService,
-    private alertController: AlertController) {
+    private readonly firebaseAuthenticationService: FirebaseAuthenticationService,
+    private readonly navCtrl: NavController,
+    private readonly storageService: StorageService,
+    private readonly alertController: AlertController,
+    private readonly zone: NgZone) {
 
-    this.initStatus();
-    this.usersService.init();
-
-    //create subscriber event
-    this.pageSelectedEvent.getEvent().subscribe((data => {
-      this.pageSelected = data;
-    }));
-
-    Network.addListener('networkStatusChange', (status: ConnectionStatus) => {
-      this.networkStatus = status.connected;
-      if (status.connected) {
-        this.animationState = 'hidden';
-        setTimeout(() => {
-          this.animationStateRouter = 'hidden';
-        }, 2000);
-
-      }
-      else {
-        this.animationState = 'show';
-        this.animationStateRouter = 'show';
-      }
-    });
+    this.initializeApp();
+    this.initNetworkStatus();
   }
 
-  async initStatus() {
-    this.networkStatus = (await Network.getStatus()).connected;
+  private async initializeApp(): Promise<void> {
+    await this.firebaseAuthenticationService.initialize();
   }
 
-  onLogout() {
+  async onLogout() {
     //emit value for the page change
-    this.pageSelectedEvent.setEvent('login');
+    //this.pageSelectedEvent.setEvent('login');
     //remove the cache data
-    this.usersService.removeUserAuthToken();
+    this.storageService.removeUserAuth();
+
+    await this.firebaseAuthenticationService.signOut();
+
     //redirect to login page
     this.navCtrl.navigateRoot('/login');
   }
@@ -112,4 +82,18 @@ export class AppComponent {
     await alert.present();
   }
 
-} 
+  async initNetworkStatus() {
+    const status = await Network.getStatus();
+    this.networkStatus = status.connected;
+    this.onNetworkStatusChange(status);
+
+    Network.addListener('networkStatusChange', this.onNetworkStatusChange);
+  }
+
+  onNetworkStatusChange = (status: ConnectionStatus) => {
+    this.zone.run(() => {
+      this.animationState = status.connected ? 'hidden' : 'show';
+    });
+  }
+
+}

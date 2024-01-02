@@ -8,30 +8,23 @@
     <ion-content>
       <ion-list lines="none">
         <ion-menu-toggle>
-          <ion-item routerLink="/tabs/dashboard" routerDirection="forward">
-            <ion-icon name="speedometer" slot="start"></ion-icon>
-            <ion-label>Dashboard</ion-label>
+          <ion-item routerLink="/tabs/tab1" routerDirection="forward">
+            <ion-icon name="wallet-outline" slot="start"></ion-icon>
+            <ion-label>Cartera</ion-label>
           </ion-item>
         </ion-menu-toggle>
 
         <ion-menu-toggle>
-          <ion-item routerLink="/tabs/trending" routerDirection="forward">
-            <ion-icon name="trending-up" slot="start"></ion-icon>
-            <ion-label>Trending</ion-label>
+          <ion-item routerLink="/tabs/tab2" routerDirection="forward">
+            <ion-icon name="people-circle-outline" slot="start"></ion-icon>
+            <ion-label>Clientes</ion-label>
           </ion-item>
         </ion-menu-toggle>
 
         <ion-menu-toggle>
-          <ion-item routerLink="/tabs/map" routerDirection="forward">
-            <ion-icon name="map" slot="start"></ion-icon>
-            <ion-label>Map</ion-label>
-          </ion-item>
-        </ion-menu-toggle>
-
-        <ion-menu-toggle>
-          <ion-item routerLink="/tabs/about" routerDirection="forward">
-            <ion-icon name="information-circle" slot="start"></ion-icon>
-            <ion-label>{{networkStatus}}</ion-label>
+          <ion-item routerLink="/tabs/tab3" routerDirection="forward">
+            <ion-icon name="options-outline" slot="start"></ion-icon>
+            <ion-label>Configuración</ion-label>
           </ion-item>
         </ion-menu-toggle>
 
@@ -44,13 +37,12 @@
       </ion-list>
     </ion-content>
   </ion-menu>
-  
-  <ion-chip [@banner-state]="animationState" [color]="networkStatus ? 'success' : 'danger'">
-    <ion-icon name="wifi" [color]="networkStatus ? 'success' : 'danger'"></ion-icon>
-    <ion-label>{{ networkStatus ? 'De nuevo en linea': 'No está conectado a internet'}}</ion-label>
-  </ion-chip>
 
-  <ion-router-outlet id="main-content" [ngStyle]="{'top': networkStatus ? '0': '2.5rem'}" 
-    [@router-outlet]="animationStateRouter"></ion-router-outlet>
+
+  <app-network-status (networkStatusChange)="onNetworkStatusChange($event)"></app-network-status>
+
+  <ion-router-outlet [ngStyle]="{'top': networkStatus ? '2.5rem': '2.5rem'}" 
+    [@router-outlet]="animationState"
+    id="main-content"></ion-router-outlet>
 
 </ion-app>

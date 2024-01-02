@@ -1,0 +1,37 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+      <ion-title>Cartera Total</ion-title>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content color="light" [fullscreen]="true" id="container">
+
+  <h2>Lista de clientes</h2>
+
+  <ion-searchbar show-clear-button="always" placeholder="Buscar cliente"
+    (ionInput)="findClient($event)"></ion-searchbar>
+
+  <ion-list [inset]="true" *ngIf="_clients.length > 0" [@filterAnimation]="clientsTotal">
+    <ion-item *ngFor="let client of _clients" (click)="goToClientDetail(client.id)" class="client" [button]="true"
+      detail="true" detail-icon="caret-forward-outline" lines="none">
+      <ion-label>{{ client.name }}</ion-label>
+    </ion-item>
+  </ion-list>
+
+  <ion-list *ngIf="_clients.length == 0">
+    <ion-item>
+      <ion-label>
+        <ion-skeleton-text [animated]="true" style="width: 80%;"></ion-skeleton-text>
+      </ion-label>
+    </ion-item>
+    <ion-item>
+      <ion-label>
+        <ion-skeleton-text [animated]="true" style="width: 80%;"></ion-skeleton-text>
+      </ion-label>
+    </ion-item>
+  </ion-list>
+
+</ion-content>

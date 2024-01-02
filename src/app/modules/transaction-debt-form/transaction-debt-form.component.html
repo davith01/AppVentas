@@ -1,0 +1,86 @@
+<ion-content class="ion-padding">
+  <ion-header class="ion-no-border">
+    <ion-toolbar>
+      <ion-title class="ion-text-center">Formulario de Transacción</ion-title>
+    </ion-toolbar>
+  </ion-header>
+
+  <form [formGroup]="transactionForm">
+    <ion-list>
+      <ion-item>
+        <ion-select interface="popover" placeholder="" label="Tipo de Transacción" formControlName="transactionType"
+          label-placement="floating" fill="outline">
+          <ion-select-option [value]="type.id" *ngFor="let type of transactionTypes">
+            {{type.name}}
+          </ion-select-option>
+        </ion-select>
+      </ion-item>
+
+      <ion-item lines="none">
+        <ion-label>Fecha de Transacción</ion-label>
+      </ion-item>
+      <ion-item>
+        <ion-datetime presentation="date" class="transaction-date" formControlName="transactionDate"></ion-datetime>
+      </ion-item>
+
+      <ion-item>
+        <ion-input label="Cantidad" type="number" formControlName="quantity"></ion-input>
+      </ion-item>
+
+      <ion-item>
+        <ion-input class="monto-input" id="monto" label="Monto" label-placement="floating" fill="outline"
+          appCurrencyFormat="COP" type="number" formControlName="amount"></ion-input>
+
+        <ion-label [ngStyle]="{'opacity': amount > 0 ? '1' : 0 }">
+          {{amount > 0 ? (amount | COP) : ' $ ' }}
+        </ion-label>
+      </ion-item>
+    </ion-list>
+  </form>
+
+
+  <ion-list>
+    <ion-item>
+      <!--Action Buttons-->
+      <h5> <small>Detalle de Transacción </small></h5>
+      <ion-button class="button-new" fill="clear" size="small" (click)="newDetailSales()">
+        <ion-icon slot="icon-only" name="add-circle-outline"></ion-icon>
+      </ion-button>
+    </ion-item>
+    <section class="detail-section" *ngIf="true">
+      <ion-row class="detail-sales-head">
+        <ion-col>Categoría</ion-col>
+        <ion-col>Cantidad</ion-col>
+        <ion-col>Precio Unitario</ion-col>
+        <ion-col>Subtotal</ion-col>
+      </ion-row>
+
+      <ion-row class="detail-sales-body" *ngFor="let detail of elementDetails">
+        <ion-col>
+          <ion-select class="detail-sales-select" placeholder="...." interface="action-sheet">
+            <ion-select-option *ngFor="let category of categoryDetails" value="{{category}}">
+              {{category}}
+            </ion-select-option>
+          </ion-select>
+        </ion-col>
+        <ion-col>
+          <ion-input class="detail-sales-input" type="number" [(ngModel)]="detail.quantity"></ion-input>
+        </ion-col>
+        <ion-col>
+          <ion-input class="detail-sales-input" type="number" [(ngModel)]="detail.unitPrice"></ion-input>
+        </ion-col>
+        <ion-col>
+          <ion-label class="detail-sales-subtotal">
+            <div>{{detail.unitPrice * detail.quantity | COP }}</div>
+          </ion-label>
+        </ion-col>
+      </ion-row>
+    </section>
+  </ion-list>
+  <ion-item>
+    <ion-button expand="block" class="button-submit" color="success" [disabled]="!transactionForm.valid"
+      (click)="submitForm()">Registrar</ion-button>
+    <ion-button expand="full" class="button-submit" color="medium" (click)="cancel()">Cancelar</ion-button>
+  </ion-item>
+
+</ion-content>

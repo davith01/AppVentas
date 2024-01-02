@@ -43,6 +43,14 @@ Download for Windows (msi): [https://desktop.github.com/](https://desktop.github
 ```
 cd appVentas/
 ```
+
+Delete node_modules in Windows
+
+```
+rmdir /s /q node_modules
+rm package-lock.json
+```
+
 ```
 npm install
 ```
@@ -69,12 +77,47 @@ ionic capacitor build: Build an Ionic project for a given platform
 ```
 ionic capacitor build android
 ```
+
 Ready for use in your Native IDE!
 To continue, build your project using Android Studio!
 
 ```
 npx cap open android
+npx cap update
+npx cap sync
 ```
+
+**Capacitor Google Auth**
+
+
+Firebase Authentication
+[Add Firebase to your project
+:(https://github.com/capawesome-team/capacitor-firebase/blob/main/docs/firebase-setup.md#android)
+
+[https://developers.google.com/android/guides/client-auth?hl=es-419]:(https://developers.google.com/android/guides/client-auth?hl=es-419)     
+[https://firebase.google.com/docs/auth/android/google-signin]:(https://firebase.google.com/docs/auth/android/google-signin)
+[https://console.firebase.google.com/]:(https://console.firebase.google.com/)
+[https://stackoverflow.com/questions/27037194/keystore-file-doesnt-exist]:(https://stackoverflow.com/questions/27037194/keystore-file-doesnt-exist)
+
+
+**Generate key SHA1 For windows**
+
+```
+cd C:\Users\userName>
+keytool -genkey -v -keystore debug.keystore -keyalg RSA -keysize 2048 -validity 10000 -alias androiddebugkey
+
+keytool -exportcert -keystore debug.keystore -list -v
+Introduzca la contrase±a del almacén de claves: my_pass_key
+```
+
+List the keys storage
+```
+keytool -alias androiddebugkey -keystore %USERPROFILE%\.android\debug.keystore -list -v
+keytool -list -v
+```
+
+keytools is a command in JAVA_HOME_DIRECTORY, example C:\Program Files\Java\jdk1.7.0_76\bin
+
 
 **Test app in simulator devices**
 

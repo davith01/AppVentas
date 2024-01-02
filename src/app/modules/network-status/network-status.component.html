@@ -1,0 +1,4 @@
+<ion-chip [@banner-state]="animationState" [color]="networkStatus ? 'success' : 'danger'">
+  <ion-icon name="wifi" [color]="networkStatus ? 'success' : 'danger'"></ion-icon>
+  <ion-label>{{ networkStatus ? 'De nuevo en linea': 'No está conectado a internet'}}</ion-label>
+</ion-chip>
