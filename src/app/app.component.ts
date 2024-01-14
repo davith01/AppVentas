@@ -1,9 +1,13 @@
-import { Component, NgZone } from '@angular/core';
+import { Component, NgZone, OnInit } from '@angular/core';
 import { FirebaseAuthenticationService } from './core';
 import { animate, state, style, transition, trigger } from '@angular/animations';
 import { AlertController, NavController } from '@ionic/angular';
 import { StorageService } from './services';
 import { ConnectionStatus, Network } from '@capacitor/network';
+import { register } from 'swiper/element/bundle';
+import { ScreenOrientation, OrientationType } from '@capawesome/capacitor-screen-orientation';
+
+register();
 
 @Component({
   selector: 'app-root',
@@ -22,7 +26,7 @@ import { ConnectionStatus, Network } from '@capacitor/network';
     ])
   ]
 })
-export class AppComponent {
+export class AppComponent implements OnInit {
 
   pageSelected: string = '';
   animationState: String = 'hidden';
@@ -41,6 +45,10 @@ export class AppComponent {
 
   private async initializeApp(): Promise<void> {
     await this.firebaseAuthenticationService.initialize();
+  }
+
+  async ngOnInit() {
+    //this.lock();
   }
 
   async onLogout() {
@@ -81,6 +89,10 @@ export class AppComponent {
 
     await alert.present();
   }
+
+  async lock() {
+    await ScreenOrientation.lock({ type: OrientationType.LANDSCAPE });
+  };
 
   async initNetworkStatus() {
     const status = await Network.getStatus();

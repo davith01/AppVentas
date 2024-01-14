@@ -1,6 +1,6 @@
-import { ErrorHandler, NgModule } from '@angular/core';
+import { CUSTOM_ELEMENTS_SCHEMA, ErrorHandler, NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
-import { RouteReuseStrategy } from '@angular/router';
+import { RouteReuseStrategy, RouterModule } from '@angular/router';
 
 import { IonicModule, IonicRouteStrategy } from '@ionic/angular';
 
@@ -11,7 +11,8 @@ import { IonicStorageModule } from '@ionic/storage-angular';
 import { HttpClientModule } from '@angular/common/http';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { ComponentsModule } from './components.module';
-
+import { CloudinaryModule } from '@cloudinary/ng';
+import { FingerprintAIO } from '@awesome-cordova-plugins/fingerprint-aio';
 
 @NgModule({
   declarations: [AppComponent],
@@ -20,9 +21,12 @@ import { ComponentsModule } from './components.module';
     BrowserModule,
     HttpClientModule,
     BrowserAnimationsModule,
-    IonicModule.forRoot(),
+    RouterModule.forRoot([]),
+    //IonicModule.forRoot(),
+    IonicModule.forRoot({ mode: 'ios' }),
     AppRoutingModule,
-    ComponentsModule
+    ComponentsModule,
+    CloudinaryModule,
   ],
   providers: [
     { provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
@@ -30,7 +34,10 @@ import { ComponentsModule } from './components.module';
       provide: ErrorHandler,
       useClass: GlobalErrorHandlerService,
     },
+    FingerprintAIO 
   ],
   bootstrap: [AppComponent],
+  schemas: [ CUSTOM_ELEMENTS_SCHEMA]
+
 })
 export class AppModule { }

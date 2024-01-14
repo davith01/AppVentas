@@ -91,8 +91,7 @@ npx cap sync
 
 
 Firebase Authentication
-[Add Firebase to your project
-:(https://github.com/capawesome-team/capacitor-firebase/blob/main/docs/firebase-setup.md#android)
+[Add Firebase to your project](https://github.com/capawesome-team/capacitor-firebase/blob/main/docs/firebase-setup.md#android)
 
 [https://developers.google.com/android/guides/client-auth?hl=es-419]:(https://developers.google.com/android/guides/client-auth?hl=es-419)     
 [https://firebase.google.com/docs/auth/android/google-signin]:(https://firebase.google.com/docs/auth/android/google-signin)

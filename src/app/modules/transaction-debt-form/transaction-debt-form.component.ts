@@ -11,39 +11,42 @@ import * as moment from 'moment';
   styleUrls: ['./transaction-debt-form.component.scss'],
 })
 export class TransactionDebtFormComponent implements OnInit {
+  
+  @Input() typeTransaction: string = 'Debt';
 
   transactionForm: FormGroup;
   transactionDate: Date | undefined;
   amount: number = 0;
   showDateTransaction = true;
   transactionTypes: TransactionType[] | undefined;
+  transactionSelect: TransactionType | undefined;
   elementDetails: DetailSales[] = [
     { "date": "", "category": "", "quantity": 1, "unitPrice": 0 },
     { "date": "", "category": "", "quantity": 1, "unitPrice": 0 },
     { "date": "", "category": "", "quantity": 1, "unitPrice": 0 }
   ];
-  categoryDetails =  ['buenas', 'picadas', 'segundarias'];
+  categoryDetails = ['buenas', 'picadas', 'segundarias'];
 
   constructor(
     private formBuilder: FormBuilder,
     private modalCtrl: ModalController,
-    private transactionTypeService: TransactionTypeService) {
-
+    private transactionTypeService: TransactionTypeService
+  ) {
     const currentDate: moment.Moment = moment();
-
     this.transactionForm = this.formBuilder.group({
       transactionType: ['', Validators.required],
       transactionDate: [currentDate.format('YYYY-MM-DD'), Validators.required],
-      amount: ['', Validators.required],
-      quantity: ['1', Validators.required]
+      amount: [''],
+      quantity: [''],
+      comment: ['']
     });
   }
 
   async ngOnInit() {
-    
+
     const transactionList = await this.transactionTypeService.getList();
-    this.transactionTypes = transactionList.filter((transaction: TransactionType)=>{
-      return transaction.typeTransaction == 'Debt';
+    this.transactionTypes = transactionList.filter((transaction: TransactionType) => {
+      return transaction.typeTransaction == this.typeTransaction;
     });
 
   }
@@ -77,22 +80,38 @@ export class TransactionDebtFormComponent implements OnInit {
     return this.modalCtrl.dismiss(null, 'cancel');
   }
 
-  selectType(type: TransactionType) {
-
-  }
-
   @HostListener('input', ['$event']) onInput(event: any) {
-
     if (event.target.parentNode.parentNode.parentNode.id == 'monto') {
       let inputValue: number = event.target.value;
       this.amount = inputValue;
     }
   }
 
-  newDetailSales(){
-    const newDetail : DetailSales= 
+  newDetailSales() {
+    const newDetail: DetailSales =
       { "date": "", "category": "Bolsas Segundas", "quantity": 1, "unitPrice": 0 };
 
     this.elementDetails.push(newDetail);
+  }
+
+  transactionChange() {
+    const transactionTypeId = this.transactionForm.value.transactionType;
+
+    const findItems = this.transactionTypes?.filter((transaction) => {
+      return transaction.id == transactionTypeId
+    });
+
+    if (findItems) {
+      this.transactionSelect = findItems[0];
+      const currentDate: moment.Moment = moment();
+
+      //si el tipo de transacciones no tiene detalles, el campo de monto es obligatorio
+      if (this.transactionSelect.detail) {
+        const amountControl = this.transactionForm.get('amount');
+        amountControl?.clearValidators();
+        amountControl?.setValidators([Validators.required]);
+        amountControl?.updateValueAndValidity();
+      }
+    }
   }
 }

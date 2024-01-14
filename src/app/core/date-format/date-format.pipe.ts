@@ -1,17 +1,22 @@
-import { DatePipe } from '@angular/common';
 import { Pipe, PipeTransform } from '@angular/core';
+import * as moment from 'moment';
 
 @Pipe({
   name: 'Fecha',
 })
 export class DateFormatPipe implements PipeTransform {
-  transform(value: string): string | null {
+  transform(value: any): string {
+    let dateItem;
 
-    if (value) {
-      // Formato colombiano: DD/MM/YYYY
-      const datePipe: DatePipe = new DatePipe('en-US');
-      return datePipe.transform(value, 'dd/MM/yyyy');
+    if (typeof value == 'object' && value.getTime) {
+      dateItem = moment(value.getTime());
+    } else if (typeof value === 'number' && !isNaN(value)) {
+      dateItem = moment(value);
+    } else if (moment(value, 'DD/MM/YYYY', true).isValid()) {
+      dateItem = moment(value, 'DD/MM/YYYY', true);
     }
-    return '';
+
+    // Formato colombiano: DD/MM/YYYY
+    return dateItem ? dateItem.format('DD/MM/YYYY') : '';
   }
 }

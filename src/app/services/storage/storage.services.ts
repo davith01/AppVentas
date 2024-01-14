@@ -3,6 +3,8 @@ import { Injectable } from '@angular/core';
 import { Storage } from '@ionic/storage-angular';
 
 const USER_AUTH = 'UserAuth';
+const URL_ICON = 'UrlIcon';
+
 
 @Injectable({
   providedIn: 'root'
@@ -32,4 +34,18 @@ export class StorageService {
   public removeUserAuth() {
     this._storage?.remove(USER_AUTH);
   }
+
+  public setUrlIcon(value: any) {
+    this._storage?.set(URL_ICON, value);
+  }
+
+  public getUrlIcon() {
+    return this._storage?.get(URL_ICON);
+  }
+
+  public removeUrlIcon() {
+    this._storage?.remove(URL_ICON);
+  }
+
+  
 }

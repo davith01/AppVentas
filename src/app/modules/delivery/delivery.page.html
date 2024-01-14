@@ -1,0 +1,210 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-buttons slot="start" *ngIf="counter==1">
+      <ion-back-button text="" icon="caret-back" defaultHref="tabs/tab2"></ion-back-button>
+    </ion-buttons>
+    <ion-buttons slot="start" *ngIf="counter > 1">
+      <ion-button size="small" (click)="onPrevious()">
+        <ion-icon name="chevron-back-outline"></ion-icon> Atrás </ion-button>
+    </ion-buttons>
+    <ion-title>Nuevo Viaje</ion-title>
+
+    <ion-buttons slot="end">
+      <ion-button size="small" *ngIf="counter <= 3" (click)="onNext()">Siguiente <ion-icon
+          name="chevron-forward-outline"></ion-icon></ion-button>
+      <ion-button size="small" *ngIf="counter == 4" color="success" (click)="onFinish()">Finalizar <ion-icon
+          name="chevron-forward-outline"></ion-icon></ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="ion-padding">
+
+  <div class="container-sliders" [class.active]="isCardActive">
+    <div class="cd-container" *ngIf="counter!=4">
+      <ion-button class="button-section" (click)="setCounterPage(1)" [size]="isLandscape ? 'default' : 'default'"
+        [color]="getProviderListSelectedLength() > 0 || counter == 1 ? 'primary' : 'medium'" [fill]="getProviderListSelectedLength() >0 ? 'solid':'outline'"
+        [ngClass]="{'small':!isLandscape , 'disabled':getProviderListSelectedLength()  == 0}" shape="round">
+        Proveedor
+      </ion-button>
+
+      <ion-button class="button-section" (click)="setCounterPage(2)" [size]="isLandscape ? 'default' : 'default'"
+        [color]="getClientsSelectedLength()>0 || counter == 2 ? 'primary' : 'medium'"
+        [fill]="getClientsSelectedLength()>0 ? 'solid':'outline'"
+        [ngClass]="{'small':!isLandscape , 'disabled':getClientsSelectedLength() == 0}" shape="round">
+        Clientes
+        <ion-badge *ngIf="getClientsSelectedLength() > 0" slot="end">{{getClientsSelectedLength()}}</ion-badge>
+      </ion-button>
+
+      <ion-button class="button-section margin-right-2" (click)="setCounterPage(3)"
+        [size]="isLandscape ? 'default' : 'default'"
+        [color]="getItemListSelectedLength()>0 || counter == 3 ? 'primary' : 'medium'"
+        [fill]="getItemListSelectedLength()>0 ? 'solid':'outline'"
+        [ngClass]="{'small':!isLandscape , 'disabled':getItemListSelectedLength() == 0}" shape="round">
+        Calidad
+        <ion-badge *ngIf="getItemListSelectedLength() > 0" slot="end">{{getItemListSelectedLength()}}</ion-badge>
+      </ion-button>
+
+      <ion-button class="button-next-form" [disabled]="" size="small" fill="clear" color="success"
+        (click)="setCounterPage(4)">
+        <ion-icon name="chevron-forward-outline"></ion-icon> </ion-button>
+    </div>
+    <div class="pagination-site-back" (click)="onPrevious()" *ngIf="counter > 1">
+    </div>
+    <div class="pagination-site-next" (click)="onNext()" *ngIf="counter!=4">
+    </div>
+
+    <div [@animImageSlider]="counter">
+      <section class="section-padding" [ngClass]="{'padding-top-0':!isLandscape,'margin-top-0':!isLandscape}"
+        *ngIf="counter === 1">
+        <h2>Paso {{counter}} <small>Seleccione el provedor</small></h2>
+        <ion-grid>
+          <ion-row>
+            <ion-col [size]="isLandscape  ? 6 : 12" class="panel1">
+              <h6>Fecha de Transacción</h6>
+              <ion-datetime-button datetime="datetime"></ion-datetime-button>
+              <div class="margin-top-1">Detalle del viaje</div>
+              <ion-textarea class="description margin-top-1" [(ngModel)]="description"></ion-textarea>
+              <ion-modal [keepContentsMounted]="true">
+                <ng-template>
+                  <ion-datetime (ionChange)="changeDateTransaction($event)" presentation="date"
+                    id="datetime"></ion-datetime>
+                </ng-template>
+              </ion-modal>
+            </ion-col>
+            <ion-col [size]="isLandscape  ? 6 : 12">
+              <ion-list *ngIf="providers.length > 0">
+                <ion-item lines="none" class="check-provider" *ngFor="let provider of providers"
+                  [ngClass]="{'select': provider.selected}"
+                  (click)="selectProvider(provider)">{{provider.name}}</ion-item>
+              </ion-list>
+              <ion-list *ngIf="providers.length == 0">
+                <ion-skeleton-text class="check-provider" [animated]="true"></ion-skeleton-text>
+                <ion-skeleton-text class="check-provider" [animated]="true"></ion-skeleton-text>
+                <ion-skeleton-text class="check-provider" [animated]="true"></ion-skeleton-text>
+              </ion-list>
+            </ion-col>
+
+          </ion-row>
+        </ion-grid>
+
+      </section>
+
+      <section class="section-padding" *ngIf="counter === 2">
+        <h2>Paso {{counter}} <small>Seleccione los clientes</small></h2>
+        <ion-list>
+          <ion-item>
+            <ion-buttons slot="start">
+              <div class="checkbox" (click)="toogleclients(true)" *ngIf="isAllClearClient()"></div>
+              <div class="checkbox selected" (click)="toogleclients(false)" *ngIf="isAllSelectedClient()">
+                <ion-icon name="checkmark-outline"></ion-icon>
+              </div>
+              <div class="checkbox partial" (click)="toogleclients(true)" *ngIf="isPartialSelectedClient()">
+                <div class="triangle triangle-client"></div>
+              </div>
+            </ion-buttons>
+            <ion-searchbar show-clear-button="always" placeholder="Buscar cliente"
+              (ionInput)="findClient($event)"></ion-searchbar>
+          </ion-item>
+
+          <ion-grid>
+            <ion-row>
+              <ion-col [size]="isLandscape? 6 : 12" *ngFor="let client of _clientsFilter">
+                <ion-row (click)="selectClient(client)">
+                  <ion-col size="3">
+                    <div class="checkbox" [hidden]="findClientInList(client)"></div>
+                    <div class="checkbox selected" *ngIf="findClientInList(client)">
+                      <ion-icon name="checkmark-outline"></ion-icon>
+                    </div>
+                  </ion-col>
+                  <ion-col size="9" class="client-name">
+                    {{client.name}}
+                  </ion-col>
+                </ion-row>
+              </ion-col>
+            </ion-row>
+          </ion-grid>
+        </ion-list>
+      </section>
+
+      <section class="section-padding" *ngIf="counter === 3">
+        <h2 class="item-title">Paso {{counter}} <small>Seleccione los items</small></h2>
+        <ion-grid>
+          <ion-row class="header-row">
+            <ion-col size="2">
+              <div class="checkbox" (click)="toogleItemList(true)" *ngIf="isAllClearItem()"></div>
+              <div class="checkbox selected" (click)="toogleItemList(false)" *ngIf="isAllSelectedItem()">
+                <ion-icon name="checkmark-outline"></ion-icon>
+              </div>
+              <div class="checkbox partial" (click)="toogleItemList(true)" *ngIf="isPartialSelectedItem()">
+                <div class="triangle"></div>
+              </div>
+            </ion-col>
+            <ion-col size="5" class="ion-text-start">Calidad</ion-col>
+            <ion-col size="5">Precio x Unidad</ion-col>
+          </ion-row>
+          <ion-row (click)="selectItem(item)" *ngFor="let item of items">
+            <ion-col size="2">
+              <div class="checkbox" [hidden]="findItemInList(item)"></div>
+              <div class="checkbox selected" *ngIf="findItemInList(item)">
+                <ion-icon name="checkmark-outline"></ion-icon>
+              </div>
+            </ion-col>
+            <ion-col size="5">{{item.name}}</ion-col>
+            <ion-col size="5">
+              <input class="item-input" placeholder="$ 0.00" [(ngModel)]="item.price" type="number"
+                (keyup)="inputOnchange($event, item)" (click)="inputClick($event)">
+            </ion-col>
+          </ion-row>
+        </ion-grid>
+      </section>
+
+      <section class="section-padding padding-right-0" *ngIf="counter === 4">
+        <div class="legend">
+          <h4> Viaje {{getProviderSelectName()}} - <small>{{ transactionDate | Fecha }}</small></h4>
+          <h6>{{ description }}</h6>
+        </div>
+        <h2>Paso {{counter}} <small>Formulario</small></h2>
+        <ion-grid class="form-delivery-table padding-right-0">
+          <ion-row class="head-row border-bottom">
+            <ion-col size="4" class="first-child">Calidad</ion-col>
+            <ion-col size="2">Unidades</ion-col>
+            <ion-col size="3">Valor Unidad</ion-col>
+            <ion-col size="3" class="last-child">Total Viaje</ion-col>
+          </ion-row>
+          <ng-container *ngFor="let item of items; let ind = index">
+            <ion-row class="body-row border-bottom item-class" *ngIf="item.selected">
+              <ion-col size="4">
+                <ion-icon class="icon-plus" (click)="toogleListClientInItem(item,ind)" id="table-item-id-{{item.id}}"
+                  [name]="!showClientInItem ? 'eye-off-outline' : 'eye-outline'">
+                </ion-icon>
+                <div class="icon-plus-line" [ngStyle]="{'height':(item.clients.length * 2.2) + 'rem'}"
+                  *ngIf="showClientInItem"></div>
+                {{ item.name }}
+              </ion-col>
+              <ion-col size="2" class="ion-text-center">{{ getTotalItemUnits(item) }}</ion-col>
+              <ion-col size="3" class="ion-text-center">{{ item.price | COP }}</ion-col>
+              <ion-col size="3" class="ion-text-end">{{ getTotalItemPrice(item) | COP }} </ion-col>
+            </ion-row>
+            <ng-container *ngFor="let client of item.clients">
+              <ion-row *ngIf="item.selected && ( showClientInItem || client.unit > 0 ) " class="body-row border-bottom">
+                <ion-col size="4">{{ client.client.name }}</ion-col>
+                <ion-col size="2" class="input-col">
+                  <input type="number" placeholder="0" (click)="inputClick($event)" [(ngModel)]="client.unit"
+                    maxlength="4" size="4" />
+                </ion-col>
+                <ion-col size="3" class="input-col">
+                  <input type="number" [placeholder]="formatPrice(item.price)" [(ngModel)]="client.price"
+                    (click)="inputClick($event)" maxlength="4" size="4" />
+                </ion-col>
+                <ion-col size="3" class="ion-text-end">{{ client.unit * ( client.price ? client.price : item.price ?
+                  item.price : 0) | COP }}</ion-col>
+              </ion-row>
+            </ng-container>
+          </ng-container>
+        </ion-grid>
+      </section>
+    </div>
+  </div>
+
+</ion-content>

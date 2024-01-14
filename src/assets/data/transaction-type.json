@@ -18,7 +18,7 @@
         "name": "Transferencia",
         "typeTransaction": "Debt",
         "icon": "swap-horizontal",
-        "detail": true
+        "detail": false
     },
     {
         "id": 4,
@@ -31,18 +31,28 @@
         "id": 5,
         "name": "Préstamo",
         "typeTransaction": "Debt",
-        "icon": "card"
+        "icon": "card",
+        "detail": false
     },
     {
         "id": 6,
         "name": "Devolución de Productos",
         "typeTransaction": "Credit",
-        "icon": "arrow-back-circle"
+        "icon": "arrow-back-circle",
+        "detail": false
     },
     {
         "id": 7,
         "name": "Ingreso de Salario",
         "typeTransaction": "Credit",
-        "icon": "wallet"
+        "icon": "wallet",
+        "detail": false
+    },
+    {
+        "id": 8,
+        "name": "Abono",
+        "typeTransaction": "Credit",
+        "icon": "cash",
+        "detail": false
     }
 ]

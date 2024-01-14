@@ -8,6 +8,12 @@ export interface DetailSales {
   unitPrice: number
 }
 
+export interface Client {
+  id: number,
+  name: string;
+  selected?: boolean;
+}
+
 export interface ClientTransaction {
   id: number,
   date: string;
@@ -33,7 +39,7 @@ export class ClientService {
 
   listClients(): Promise<any | undefined> {
     return new Promise((resolve, reject) => {
-      this.http.get<any[]>(this.dataclientsUrl)
+      this.http.get<Client[]>(this.dataclientsUrl)
         .subscribe((response) => {
           this.clients = response;
           setTimeout(() => {

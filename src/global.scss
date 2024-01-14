@@ -24,3 +24,51 @@
 @import "~@ionic/angular/css/text-alignment.css";
 @import "~@ionic/angular/css/text-transformation.css";
 @import "~@ionic/angular/css/flex-utils.css";
+
+.display-flex {
+    display: flex;
+}
+
+@for $i from -10 through 50 {
+    $remValue: $i * 1rem;
+
+    .padding-#{$i} {
+        padding: $remValue !important;
+    }
+
+    .padding-top-#{$i} {
+        padding-top: $remValue !important;
+    }
+
+    .padding-left-#{$i} {
+        padding-left: $remValue !important;
+    }
+
+    .padding-right-#{$i} {
+        padding-right: $remValue !important;
+    }
+
+    .padding-bottom-#{$i} {
+        padding-bottom: $remValue !important;
+    }
+
+    .margin-#{$i} {
+        margin: $remValue !important;
+    }
+
+    .margin-top-#{$i} {
+        margin-top: $remValue !important;
+    }
+
+    .margin-left-#{$i} {
+        margin-left: $remValue !important;
+    }
+
+    .margin-right-#{$i} {
+        margin-right: $remValue !important;
+    }
+
+    .margin-bottom-#{$i} {
+        margin-bottom: $remValue !important;
+    }
+}

@@ -1,20 +1,22 @@
-import { IonicModule } from '@ionic/angular';
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Tab2Page } from './tab2.page';
 
-import { Tab2PageRoutingModule } from './tab2-routing.module';
+import { IonicModule } from '@ionic/angular';
+
+import { DeliveryPageRoutingModule } from './delivery-routing.module';
+
+import { DeliveryPage } from './delivery.page';
 import { ComponentsModule } from '@app/components.module';
 
 @NgModule({
   imports: [
-    IonicModule,
     CommonModule,
     FormsModule,
+    IonicModule,
     ComponentsModule,
-    Tab2PageRoutingModule
+    DeliveryPageRoutingModule
   ],
-  declarations: [Tab2Page]
+  declarations: [DeliveryPage]
 })
-export class Tab2PageModule {}
+export class DeliveryPageModule {}

@@ -2,26 +2,30 @@
   <ion-toolbar>
     <ion-buttons slot="start">
       <ion-menu-button></ion-menu-button>
-      <ion-title>Cartera Total</ion-title>
+      <app-icon-logo></app-icon-logo>
     </ion-buttons>
+    <ion-title>Cartera de Clientes</ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content color="light" [fullscreen]="true" id="container">
-
-  <h2>Lista de clientes</h2>
-
   <ion-searchbar show-clear-button="always" placeholder="Buscar cliente"
     (ionInput)="findClient($event)"></ion-searchbar>
 
-  <ion-list [inset]="true" *ngIf="_clients.length > 0" [@filterAnimation]="clientsTotal">
-    <ion-item *ngFor="let client of _clients" (click)="goToClientDetail(client.id)" class="client" [button]="true"
-      detail="true" detail-icon="caret-forward-outline" lines="none">
-      <ion-label>{{ client.name }}</ion-label>
-    </ion-item>
-  </ion-list>
+  <h6>Lista de clientes</h6>
 
-  <ion-list *ngIf="_clients.length == 0">
+  <ion-grid *ngIf="loading" [inset]="true">
+    <ion-row  [@filterAnimation]="clientsTotal">
+      <ion-col [size]="isLandscape ? 5 : 12" *ngFor="let client of _clientsFilter">
+        <ion-button expand="full" (click)="goToClientDetail(client.id)">
+          {{ client.name }}
+          <ion-icon slot="end" name="caret-forward-outline"></ion-icon>
+        </ion-button>         
+      </ion-col>
+    </ion-row>
+  </ion-grid> 
+
+  <ion-list *ngIf="!loading">
     <ion-item>
       <ion-label>
         <ion-skeleton-text [animated]="true" style="width: 80%;"></ion-skeleton-text>

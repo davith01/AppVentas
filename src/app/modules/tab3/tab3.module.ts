@@ -5,12 +5,14 @@ import { FormsModule } from '@angular/forms';
 import { Tab3Page } from './tab3.page';
 
 import { Tab3PageRoutingModule } from './tab3-routing.module';
+import { ComponentsModule } from '@app/components.module';
 
 @NgModule({
   imports: [
     IonicModule,
     CommonModule,
-    FormsModule,
+    FormsModule, 
+    ComponentsModule,
     Tab3PageRoutingModule
   ],
   declarations: [Tab3Page]

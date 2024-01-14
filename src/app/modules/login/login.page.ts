@@ -1,8 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { Router } from '@angular/router';
 import { DialogService, FirebaseAuthenticationService } from '@app/core';
 import { StorageService, UsersService } from '@app/services';
+import { environment } from '@env/environment';
+import { FingerprintAIO } from '@awesome-cordova-plugins/fingerprint-aio/ngx';
+import { Platform } from '@ionic/angular';
 
 @Component({
   selector: 'app-login',
@@ -12,6 +16,8 @@ import { StorageService, UsersService } from '@app/services';
 export class LoginPage implements OnInit {
 
   showFingerPrint = true;
+  urlIcon: string = '';
+  urlIconHtml: SafeHtml | undefined;
 
   EMAILPATTERN = /^[a-z0-9!#$%&'*+\/=?^_`{|}~.-]+@[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)*$/i;
   signinForm = new FormGroup({
@@ -29,24 +35,43 @@ export class LoginPage implements OnInit {
       { type: 'required', message: 'Campo requerido.' }
     ]
   };
-  
+
+  isFingerprintAvailable: string | undefined;
+
   constructor(
     private readonly firebaseAuthenticationService: FirebaseAuthenticationService,
     private readonly dialogService: DialogService,
     private readonly router: Router,
     private readonly usersService: UsersService,
-    private readonly storageService: StorageService
-  ) {}
+    private readonly storageService: StorageService,
+    private sanitizer: DomSanitizer,
+    private platform: Platform,
+    private fingerprintAIO: FingerprintAIO
+  ) { }
 
-  public ngOnInit(): void {
+  public async ngOnInit() {
+    this.urlIcon = await this.storageService.getUrlIcon();
+    this.urlIcon = this.urlIcon || environment.urlIcon;
+    this.urlIconHtml = this.sanitizer.bypassSecurityTrustUrl(this.urlIcon);
+    if (this.platform.is('capacitor')) {
+      this.fingerprintAIO.isAvailable().then((result) => {
+        //'finger' | 'face' | 'biometric'
+        this.isFingerprintAvailable = result;
+        }).catch((err) => {
+        console.log({ err });
+      });
+    }   
+
     this.firebaseAuthenticationService.getRedirectResult().then((result) => {
       if (result?.user) {
         this.goToHome();
       }
     });
+
     this.firebaseAuthenticationService.phoneVerificationCompleted$.subscribe(
       () => this.goToHome()
     );
+
     this.firebaseAuthenticationService.phoneCodeSent$.subscribe(
       async (event) => {
         const verificationCode = await this.showInputVerificationCodeAlert();
@@ -66,6 +91,15 @@ export class LoginPage implements OnInit {
         }
       }
     );
+  }
+
+  performBiometricVerification() {
+    this.fingerprintAIO.show({
+      disableBackup: true
+    })
+    .then((result: any) => this.dialogService.showErrorAlert(result))
+    .catch((error: any) => this.dialogService.showErrorAlert(error));
+
   }
 
   public async signInWithApple(): Promise<void> {
@@ -187,15 +221,15 @@ export class LoginPage implements OnInit {
   async onLogin() {
 
     if (this.signinForm.valid) {
-      
+
       const loadingElement = await this.dialogService.showLoading();
       let userAuth = { 'email': this.signinForm.value.email, 'password': this.signinForm.value.password };
 
       // Invoque the services login 
       this.usersService.login(userAuth)
-        .then( async(response: any) => {
-          
-          loadingElement.dismiss();  
+        .then(async (response: any) => {
+
+          loadingElement.dismiss();
 
           if (response.data && response.data.login) {
             userAuth = Object.assign(userAuth, response.data.login);
@@ -208,7 +242,7 @@ export class LoginPage implements OnInit {
         });
     }
   }
-  
+
   private async goToHome(): Promise<void> {
     await this.router.navigate(['/tabs/tab1'], { replaceUrl: true });
   }

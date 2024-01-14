@@ -20,7 +20,8 @@
       "@env/*": ["src/environments/*"],
       "@e2e/*": ["e2e/src/*"],
       "@tests/*": ["src/tests/*"]
-    }
+    },
+    "types": ["cloudinary"]
   },
   "angularCompilerOptions": {
     "enableI18nLegacyMessageIdFormat": false,

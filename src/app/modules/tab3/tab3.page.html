@@ -2,20 +2,42 @@
   <ion-toolbar>
     <ion-buttons slot="start">
       <ion-menu-button></ion-menu-button>
+      <app-icon-logo></app-icon-logo>
+    </ion-buttons>
+    <ion-title>Configuración</ion-title>
+    <ion-buttons slot="end">
+      <ion-avatar aria-hidden="true">
+        <img alt="" class="header-content-icon" src="assets/icon/theme.png" />
+      </ion-avatar>
       <ion-title>Configuración</ion-title>
-    </ion-buttons>    
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
-
 
 <ion-content [fullscreen]="true" class="ion-padding">
   <ion-grid>
     <ion-row>
-      <ion-col size="6" *ngFor="let option of options">
-        <ion-card (click)="navigateToOption(option)" class="ion-text-center">
-          <img [src]="option.image" alt="{{ option.title }}" class="config-icon">
+      <ion-col size="6">
+        <ion-card (click)="openCloudinaryWidget()" class="ion-text-center">
+          <img [src]="urlIconHtml" alt="Logo" class="grid-icon">
           <ion-card-content>
-            <ion-card-title>{{ option.title }}</ion-card-title>
+            <ion-card-title>Logo</ion-card-title>
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+      <ion-col size="6">
+        <ion-card class="ion-text-center">
+          <img src="assets/icon/products.png" alt="Productos" class="grid-icon">
+          <ion-card-content>
+            <ion-card-title>Productos</ion-card-title>
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+      <ion-col size="6">
+        <ion-card (click)="navigateToOption('/Transacciones','/Transacciones')" class="ion-text-center">
+          <img src="assets/icon/transaction.png" alt="Transacciones" class="grid-icon">
+          <ion-card-content>
+            <ion-card-title>Transacciones</ion-card-title>
           </ion-card-content>
         </ion-card>
       </ion-col>

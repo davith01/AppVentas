@@ -11,5 +11,5 @@ const firebaseConfig = {
 export const environment = {
   production: true,
   firebase: firebaseConfig,
-
+  urlIcon: 'assets/icon/default-icon.png'
 };

@@ -2,7 +2,7 @@ ion-card {
     cursor: pointer;
 }
 
-.config-icon {
+.grid-icon {
     width: 6rem;
     height: 6rem;
     object-fit: cover;
@@ -10,4 +10,10 @@ ion-card {
 
 ion-card-title {
     font-size: 1rem;
+}
+
+.header-content-icon {
+    width: 2.5rem;
+    height: auto;
+    margin-top: 0.5rem;
 }

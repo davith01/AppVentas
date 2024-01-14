@@ -5,3 +5,5 @@ export * from './storage/storage.services';
 export * from './user.services/users.service';
 export * from './clients.service/clients.service';
 export * from './transaction-type.service/transaction-type.service';
+export * from './provider.service/provider.service';
+export * from './screen-size/screen-size.service';

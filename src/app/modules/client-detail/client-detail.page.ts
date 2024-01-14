@@ -3,8 +3,10 @@ import { ActivatedRoute } from '@angular/router';
 import { trigger, transition, style, animate, query, stagger } from '@angular/animations';
 import { ModalController, IonModal, AlertController, ToastController, IonPopover, IonContent } from '@ionic/angular';
 import * as moment from 'moment';
-import { ClientService, ClientTransaction, SortState, TransactionType, TransactionTypeService } from '@app/services';
+import { ClientService, ClientTransaction, ScreenSizeService, SortState, StorageService, TransactionType, TransactionTypeService } from '@app/services';
 import { TransactionDebtFormComponent } from '../transaction-debt-form/transaction-debt-form.component';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { environment } from '@env/environment';
 
 
 const listAnimation = trigger('listAnimation', [
@@ -40,32 +42,44 @@ export class ClientDetailPage implements OnInit {
 
   clientId: string = '';
   client: any;
+  urlIcon: string = '';
+  urlIconHtml: SafeHtml | undefined;
 
   clickedRows = new Set<ClientTransaction>();
   dataClientTransaction: (ClientTransaction)[] | undefined;
   dataClientTransactionOri: (ClientTransaction)[] | undefined;
   sortState: SortState = { field: 'date', direction: 'desc' };
-
   detailSalesSelected: number = 0;
-
+  transactionTypes: TransactionType[] | undefined;
+  isLandscape = false;
+  
   @ViewChild(IonModal) modal: IonModal | undefined;
   @ViewChild('popoverTransaction') popoverTransaction: IonPopover | undefined;
 
-
-  transactionTypes: TransactionType[] | undefined;
-
   constructor(
-    public activatedRoute: ActivatedRoute,
-    public clientService: ClientService,
+    private activatedRoute: ActivatedRoute,
+    private clientService: ClientService,
     private modalController: ModalController,
-    private alertController: AlertController,
     private transactionTypeService: TransactionTypeService,
-    private toastController: ToastController) {
+    private toastController: ToastController,
+    private storageService: StorageService,
+    private sanitizer: DomSanitizer,
+    private screenSizeService: ScreenSizeService
+  ) {
 
-      
+
   }
 
   async ngOnInit() {
+
+    // Suscribe al observable del servicio para recibir actualizaciones sobre el tamaño de la pantalla
+    this.screenSizeService.isLandscape$.subscribe((isLandscape) => {
+      this.isLandscape = isLandscape;
+    });
+
+    this.urlIcon = await this.storageService.getUrlIcon();
+    this.urlIcon = this.urlIcon || environment.urlIcon;
+    this.urlIconHtml = this.sanitizer.bypassSecurityTrustUrl(this.urlIcon);
 
     this.transactionTypes = await this.transactionTypeService.getList();
 
@@ -127,6 +141,7 @@ export class ClientDetailPage implements OnInit {
     }
     this.renderSort();
   }
+
   renderSort() {
     const { direction, field } = this.sortState;
 
@@ -148,8 +163,6 @@ export class ClientDetailPage implements OnInit {
       this.dataClientTransaction = this.dataClientTransactionOri;
     }
   }
-
-
 
   showDateFilter = false;
   filterDate = '';
@@ -183,56 +196,10 @@ export class ClientDetailPage implements OnInit {
   }
 
   async openModalPay() {
-    const alert = await this.alertController.create({
-      header: 'Formulario de Alerta',
-      inputs: [
-        {
-          name: 'transactionType',
-          type: 'text',
-          placeholder: 'Tipo de Transacción'
-        },
-        {
-          name: 'transactionDate',
-          type: 'date',
-          placeholder: 'Fecha de Transacción'
-        },
-        {
-          name: 'amount',
-          type: 'number',
-          placeholder: 'Monto'
-        },
-        {
-          name: 'paymentMethod',
-          type: 'text',
-          placeholder: 'Método de Pago'
-        },
-      ],
-      buttons: [
-        {
-          text: 'Cancelar',
-          role: 'cancel',
-          handler: () => {
-            console.log('Cancelado');
-          }
-        },
-        {
-          text: 'Guardar',
-          handler: (data) => {
-            console.log('Datos guardados:', data);
-            // Aquí puedes realizar acciones con los datos del formulario
-          }
-        }
-      ]
-    });
-
-    await alert.present();
-  }
-
-  async openModalDebt() {
     const modal = await this.modalController.create({
       component: TransactionDebtFormComponent, // Reemplaza TuModalComponent con el nombre real de tu componente modal
       componentProps: {
-
+        typeTransaction: 'Credit'
       },
       cssClass: 'modal-transaction-form',
       /*backdropDismiss: false*/
@@ -245,7 +212,28 @@ export class ClientDetailPage implements OnInit {
     // Este código se ejecuta cuando el modal se cierra
     if (data) {
       console.log('Modal cerrado con datos:', data);
-      //data.amount *= -1;
+      data.amount *= -1;
+      this.addTransacction(data);
+    }
+  }
+
+  async openModalDebt() {
+    const modal = await this.modalController.create({
+      component: TransactionDebtFormComponent, // Reemplaza TuModalComponent con el nombre real de tu componente modal
+      componentProps: {
+        typeTransaction: 'Debt'
+      },
+      cssClass: 'modal-transaction-form',
+      /*backdropDismiss: false*/
+    });
+
+    await modal.present();
+
+    const { data } = await modal.onDidDismiss();
+
+    // Este código se ejecuta cuando el modal se cierra
+    if (data) {
+      console.log('Modal cerrado con datos:', data);
       this.addTransacction(data);
     }
   }
@@ -262,8 +250,8 @@ export class ClientDetailPage implements OnInit {
       id: this.dataClientTransactionOri ? this.dataClientTransactionOri.length + 1 : 1,
       date: transactionDate,
       transaction: transactionType ? transactionType.name : '',
-      quantity: data.quantity,
-      price: data.amount,
+      quantity: data.quantity || 1,
+      price: Number(data.amount),
       syncRequired: true,
       paymentMethod: data.paymentMethod
     }

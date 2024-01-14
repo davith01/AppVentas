@@ -2,12 +2,63 @@
   <ion-toolbar>
     <ion-buttons slot="start">
       <ion-menu-button></ion-menu-button>
-      <ion-title>Clientes</ion-title>
+      <app-icon-logo></app-icon-logo>
+    </ion-buttons>
+    <ion-title>Lista de viajes</ion-title>
+    <ion-buttons slot="end">
+      <ion-button class="button-new" fill="clear" size="small" (click)="newDelivery()" id="click-trigger">
+        Nuevo viaje
+        <ion-icon slot="end" name="add-circle-outline"></ion-icon>
+      </ion-button>
     </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
 <ion-content [fullscreen]="true" color="light">
+
+  <section id="cd-timeline" class="cd-container">
+    <div *ngFor="let activity of timeline">
+      <div class="cd-timeline-block">
+        <div class="cd-timeline-icon" [ngStyle]="{'background-color': activity.click ? activity.provider.color : ''}">
+          <ion-icon *ngIf="!activity.click" (click)="activity.click = !activity.click" aria-hidden="true"
+            [name]="activity.icon"></ion-icon>
+          <span *ngIf="activity.click" (click)="activity.click = !activity.click">{{ activity.provider | Alias}}</span>
+        </div>
+        <div class="cd-timeline-content">
+          <h5 class="card-title">{{activity.transactionType.name}} - {{activity.provider.name}}</h5>
+          <small>
+            <span class="cd-author">
+              Fecha: {{activity.date | Fecha}}
+            </span>
+            <span class="timelineText">
+              Unidades: {{activity.units}}
+              Total: {{activity.total | COP}}
+            </span>
+            <br />
+          </small>
+
+          <ion-grid *ngIf="activity.subTotals" class="table">
+            <ion-row class="row-head">
+              <ion-col>Clase</ion-col>
+              <ion-col>Unidades</ion-col>
+              <ion-col>SubTotal</ion-col>
+            </ion-row>
+            <ion-row class="row-body" *ngFor="let subTotal of activity.subTotals">
+              <ion-col>{{subTotal.type}}</ion-col>
+              <ion-col>{{subTotal.unit}}</ion-col>
+              <ion-col class="text-align-right">{{subTotal.total | COP}}</ion-col>
+            </ion-row>
+            <ion-row class="row-foot">
+              <ion-col>Total</ion-col>
+              <ion-col>{{activity.units}}</ion-col>
+              <ion-col class="text-align-right">{{activity.total | COP}}</ion-col>
+            </ion-row>
+          </ion-grid>
+
+        </div>
+      </div>
+    </div>
+  </section>
 
   <div *ngFor="let item of list">
     <ion-card>

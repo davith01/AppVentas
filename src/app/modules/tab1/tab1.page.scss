@@ -6,73 +6,25 @@
   text-decoration: none;
 }
 
-.clients {
-    margin: 0 0 2em 0;
-    list-style-type: none;
+ion-grid {
+  ion-col {
+    margin-left: auto;
+    margin-right: auto;
     padding: 0;
-    width: 15em;
+
+    ion-button {
+      --background: white;
+      border-radius: 6px;
+      color: black;
+      text-align: left;
+      padding: 0;
+      margin: 0;
+      opacity: 0.6;
+    }
+
+    ion-icon {
+      color: gray;
+      margin-left: auto;
+    }
   }
-  
-  .clients li {
-    position: relative;
-    height: 2.3em;
-    overflow:hidden;
-    margin: .5em;
-  }
-  
-  .clients li > .inner {
-    cursor: pointer;
-    background-color: #EEE;
-    padding: .3em 0;
-    height: 1.6em;
-    border-radius: 4px;
-    width: 19em;
-  }
-  
-  .clients li:hover > .inner {
-    color: #607D8B;
-    background-color: #DDD;
-    transform: translateX(.1em);
-  }
-  
-  .clients a {
-    color: #888;
-    text-decoration: none;
-    position: relative;
-    display: block;
-    width: 250px;
-  }
-  
-  .clients a:hover {
-    color:#607D8B;
-  }
-  
-  .clients .badge {
-    display: inline-block;
-    font-size: small;
-    color: white;
-    padding: 0.8em 0.7em 0 0.7em;
-    background-color: #607D8B;
-    line-height: 1em;
-    position: relative;
-    left: -1px;
-    top: -4px;
-    height: 1.8em;
-    min-width: 16px;
-    text-align: right;
-    margin-right: .8em;
-    border-radius: 4px 0 0 4px;
-  }
-    
-  input {
-    font-size: 100%;
-    margin-bottom: 2px;
-    width: 11em;
-  }
-  
-  .client input {
-    position: relative;
-    top: -3px;
-    width: 12em;
-  }
-  
+}

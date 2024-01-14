@@ -1,16 +1,19 @@
 import { NgModule } from '@angular/core';
-import { CurrencyFormatPipe, DateFormatPipe } from './core';
+import { AliasProviderPipe, CurrencyFormatPipe, DateFormatPipe } from './core';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatInputModule } from '@angular/material/input';
 import { NetworkStatusComponent } from './modules/network-status/network-status.component';
+import { IconLogoComponent } from './modules/icon-logo/icon-logo.component';
 
 @NgModule({
     declarations: [
         CurrencyFormatPipe,
         DateFormatPipe,
-        NetworkStatusComponent
+        NetworkStatusComponent,
+        IconLogoComponent,
+        AliasProviderPipe
     ],
     providers: [],
     imports: [
@@ -26,7 +29,9 @@ import { NetworkStatusComponent } from './modules/network-status/network-status.
         MatFormFieldModule,
         MatDatepickerModule,
         MatInputModule,
-        NetworkStatusComponent
+        NetworkStatusComponent,
+        IconLogoComponent,
+        AliasProviderPipe
     ]
 })
 export class ComponentsModule { }

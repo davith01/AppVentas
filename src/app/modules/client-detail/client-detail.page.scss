@@ -15,6 +15,11 @@
     height: 100%;
 }
 
+.filter-col {
+    padding: 0;
+    margin: 0;
+}
+
 /*Table CSS Styles*/
 .table {
     background-color: var(--mat-table-background-color, #fff);
@@ -66,7 +71,7 @@ ion-col,
     font-weight: bold;
 }
 
-.syncRequired{
+.syncRequired {
     border: 2px solid var(--ion-color-warning);
     border-style: dashed;
     background-color: rgb(255, 202, 34, 0.5);
@@ -186,6 +191,24 @@ ion-popover.popover-actions::part(content)::before {
     transform: rotateX(180deg);
 }
 
-.with_0{
-    width: 0;;
+.with_0 {
+    width: 0;
+    ;
+}
+
+.float-row {
+    height: 0.4rem;
+    padding-top: 0;
+    padding-bottom: 1.5rem;
+    margin: 0;
+    text-align: left;
+    padding-left: 1rem;
+}
+
+.border-bottom {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+}
+
+.bold {
+    font-weight: bold;
 }

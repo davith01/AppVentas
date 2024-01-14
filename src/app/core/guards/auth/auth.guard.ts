@@ -14,7 +14,7 @@ export class AuthGuard implements CanActivate {
   ) { }
 
   public async canActivate(): Promise<boolean> {
-    debugger
+    
     const user = await this.firebaseAuthenticationService.getCurrentUser();
     if (user) {
       return true;
