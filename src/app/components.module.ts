@@ -6,6 +6,7 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatInputModule } from '@angular/material/input';
 import { NetworkStatusComponent } from './modules/network-status/network-status.component';
 import { IconLogoComponent } from './modules/icon-logo/icon-logo.component';
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 
 @NgModule({
     declarations: [
@@ -20,7 +21,8 @@ import { IconLogoComponent } from './modules/icon-logo/icon-logo.component';
         MatNativeDateModule,
         MatFormFieldModule,
         MatDatepickerModule,
-        MatInputModule
+        MatInputModule,
+        FontAwesomeModule
     ],
     exports: [
         CurrencyFormatPipe,

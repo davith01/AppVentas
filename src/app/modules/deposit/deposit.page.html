@@ -1,0 +1,227 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+      <app-icon-logo></app-icon-logo>
+    </ion-buttons>
+    <ion-title *ngIf="!isNewDeposit && !isSmallScreen">Lista de Abonos</ion-title>
+    <ion-buttons slot="end" *ngIf="!isNewDeposit">
+      <ion-button class="button-new" color="primary" fill="solid" size="small" (click)="onNewDepositButton()">
+        Nuevo Abono
+        <ion-icon slot="end" name="add-circle-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-buttons slot="end" *ngIf="isNewDeposit">
+      <ion-button class="button-new" color="medium" fill="solid" size="small" (click)="onNewDepositClose()">
+        Cancelar
+      </ion-button>
+      <ion-button class="button-new" color="success" [fill]="getTransactionPending() == 0 ? 'outline' : 'solid'"
+        size="small" (click)="presentAlertConfirm()">
+        Aceptar
+        <ion-icon slot="end" name="add-circle-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content color="light" [fullscreen]="true" [@animImageSlider]="counter">
+
+  <ng-container *ngIf="!loading">
+
+    <h6 class="ion-text-center" *ngIf="!isNewDeposit && isSmallScreen">Lista de Abonos</h6>
+    <h6 class="ion-text-center" *ngIf="isNewDeposit && isSmallScreen">Nuevo Abono</h6>
+
+
+    <!--Filters -->
+    <div class="display-flex color-gray margin-left-1 margin-top-1">
+      <div (click)="showDateFilter = !showDateFilter" class="margin-right-1">
+        <ion-icon name="funnel-outline" class="filter-icon"></ion-icon>
+        <ion-icon [name]="showDateFilter ? 'caret-down-outline' : 'caret-forward-outline'"></ion-icon>
+      </div>
+      <div class="margin-top-03" (click)="showDateFilter = !showDateFilter">
+        <span class="margin-left-0">
+          {{ onlyToday ? 'Abonos de hoy' : ''}}
+          <ion-icon name="calendar-outline" *ngIf="filterDateIni"></ion-icon>
+          {{ filterDateIni ? 'Desde ': ''}}
+          {{ filterDateIni | Fecha }}
+        </span>
+        <br *ngIf="isSmallScreen && filterDateFinal" />
+        <span class="margin-left-1">
+          <ion-icon name="calendar-outline" *ngIf="filterDateFinal"></ion-icon>
+          {{ filterDateFinal ? ' Hasta ': '' }}
+          {{ filterDateFinal | Fecha }}
+        </span>
+      </div>
+    </div>
+    <!--Filters Detail -->
+    <ion-grid class="container-filter color-gray" *ngIf="showDateFilter" @fadeAnimation>
+      <ion-row>
+        <div class="line-top margin-auto margin-top-1">
+          Seleccione las fechas
+        </div>
+        <ion-col [size]="isLandscape ? 6 : 12">
+          <ion-row>
+            <ion-col>
+              Desde
+              <ion-datetime-button [ngClass]="{'empty': !filterDateStart}"
+                datetime="datetime-start"></ion-datetime-button>
+              <ion-modal [keepContentsMounted]="true">
+                <ng-template>
+                  <ion-datetime presentation="date" (ionChange)="changeDateStart($event)" id="datetime-start"
+                    [(ngModel)]="filterDateStart"></ion-datetime>
+                </ng-template>
+              </ion-modal>
+            </ion-col>
+            <ion-col>
+              Hasta
+              <ion-datetime-button [ngClass]="{'empty':!filterDateEnd}" datetime="datetime-end"></ion-datetime-button>
+              <ion-modal [keepContentsMounted]="true">
+                <ng-template>
+                  <ion-datetime presentation="date" [(ngModel)]="filterDateEnd" (ionChange)="changeDateEnd($event)"
+                    id="datetime-end"></ion-datetime>
+                </ng-template>
+              </ion-modal>
+            </ion-col>
+          </ion-row>
+        </ion-col>
+        <ion-col size="12" class="display-flex">
+          <ion-checkbox (click)="filterDateStart = null; filterDateEnd = null;" [(ngModel)]="isFilterToday">Solo
+            hoy</ion-checkbox>
+          <div class="ion-text-end width-100">
+            <ion-button class="clear-date-filter margin-left-auto" size="small" fill="outline" color="primary"
+              (click)="confirmDateFilter()">
+              Filtrar
+            </ion-button>
+            <ion-button class="clear-date-filter margin-left-1" size="small" fill="outline" color="medium"
+              (click)="clearDateFilter()">
+              Limpiar
+            </ion-button>
+          </div>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+    <!--searchbar -->
+    <ion-searchbar show-clear-button="always" placeholder="Buscar cliente"
+      (ionInput)="findClientByName($event)"></ion-searchbar>
+
+    <h6 *ngIf="!loading && !isNewDeposit" class="ion-text-center">
+      Lista de {{getTransactionCount()}} abonos {{onlyToday?' en el día de hoy':' entre las fechas'}}</h6>
+    <h6 *ngIf="!loading && isNewDeposit" class="ion-text-center">Registro de abonos por usuario</h6>
+
+    <ion-grid>
+      <ion-row [@filterAnimation]="clientsTotal" *ngFor="let dateCss of datesCss; let index =  index"
+        class="font-size-small">
+        <ion-col [size]="isSmallScreen ? 12: 6" class="margin-bottom-05 margin-top-05"
+          [ngClass]="{'col-size-4_5':!isSmallScreen}">
+          Fecha:
+          <span *ngIf="!isNewDeposit" class="margin-left-1">{{dateCss.date}}</span>
+          <div *ngIf="isNewDeposit">
+            <ion-datetime-button class="new-deposit-date"
+              [ngClass]="{'empty': !newDepositFilterDate || newDepositFilterDate.length==0}"
+              datetime="datetime-new-deposit"></ion-datetime-button>
+            <ion-modal [keepContentsMounted]="true">
+              <ng-template>
+                <ion-datetime presentation="date" (ionChange)="changeNewDepositFilterDate($event)"
+                  id="datetime-new-deposit" [(ngModel)]="newDepositFilterDate"></ion-datetime>
+              </ng-template>
+            </ion-modal>
+          </div>
+        </ion-col>
+        <ng-container *ngIf="!isSmallScreen && index == 0">
+          <ion-col class="col-size-2_5 ion-text-center margin-bottom-05 margin-top-05"> Cantidad </ion-col>
+          
+          <ion-col class="col-size-2_5 ion-text-center margin-bottom-05 margin-top-05" *ngIf="!isNewDeposit"> Saldo Anterior </ion-col>
+          <ion-col class="col-size-2_5 ion-text-center margin-bottom-05 margin-top-05" *ngIf="!isNewDeposit"> <strong>Saldo Después</strong></ion-col>
+          <ion-col class="col-size-2_5 ion-text-center margin-bottom-05 margin-top-05" *ngIf="isNewDeposit"> Saldo Actual </ion-col>
+          <ion-col class="col-size-2_5 ion-text-center margin-bottom-05 margin-top-05" *ngIf="isNewDeposit"> <strong>Nuevo Saldo</strong>
+          </ion-col>
+        </ng-container>
+        <ng-container *ngFor="let transactionCss of dateCss.transactionsCss; let index = index;">
+          <ion-col size="12" class="transaction-body">
+            <ion-row class="font-size-small" *ngIf="!isSmallScreen">
+              <ion-col class="col-size-4_5 adjust-txt">
+                {{ transactionCss.transaction?.client?.name}}
+              </ion-col>
+              <ion-col class="col-size-2_5 ">
+                <input class="input-trx-price" [ngClass]="{'syncRequired': transactionCss.isEdited}"
+                  (keyup)="modifySyncronizeTransaction(transactionCss)" type="number" [readonly]="!isNewDeposit"
+                  placeholder="$ 0.000" [(ngModel)]="transactionCss.price" *ngIf="isNewDeposit" />
+                <div class="input-trx-price readonly" *ngIf="!isNewDeposit"> {{ (transactionCss.price) | COP}}</div>
+              </ion-col>
+              <ion-col size="2" class=" col-size-2_5">
+                <div class="input-trx-price readonly"> {{ transactionCss.transaction.balanceBefore | COP }}</div>
+              </ion-col>
+              <ion-col size="2" class=" col-size-2_5" *ngIf="!isNewDeposit">
+                <div class="input-trx-price readonly"> <strong>{{ transactionCss.transaction.balanceAfter | COP
+                    }}</strong></div>
+              </ion-col>
+              <ion-col size="2" class=" col-size-2_5" *ngIf="isNewDeposit">
+                <div class="input-trx-price readonly">
+                  <strong *ngIf="transactionCss.price">
+                    {{ transactionCss.transaction.client.balance - (transactionCss.price || 0) | COP }}
+                  </strong>
+                </div>
+              </ion-col>
+            </ion-row>
+
+            <ion-row *ngIf="isSmallScreen" class=" padding-1">
+              <ion-label class="margin-bottom-0">
+                <div class="display-flex margin-bottom-05 margin-top-05">
+                  <span>{{ transactionCss.transaction?.client?.name}}</span>
+                </div>
+                <div class="display-flex">
+                  <strong class="margin-right-1" [ngStyle]="{'margin-top':'0.5rem'}">Cantidad:</strong>
+                  <input class="input-trx-price margin-bottom-05 margin-top-0"
+                    [ngClass]="{'syncRequired': transactionCss.isEdited}"
+                    (keyup)="modifySyncronizeTransaction(transactionCss)" type="number"
+                    placeholder="{{ transactionCss.price | COP}}" [(ngModel)]="transactionCss.price"
+                    *ngIf="isNewDeposit" />
+                  <div class="input-trx-price readonly margin-bottom-05" *ngIf="!isNewDeposit"> {{
+                    (transactionCss.price) | COP}}</div>
+                </div>
+                <div>
+                  <strong class="margin-right-1 margin-bottom-05">Saldo Anterior:</strong>
+                  {{ transactionCss.transaction.balanceBefore | COP }}
+                </div>
+                <div class="margin-bottom-05" *ngIf="!isNewDeposit">
+                  <strong class="margin-right-1">Saldo Después:</strong>
+                  {{ transactionCss.transaction.balanceAfter | COP }}
+                </div>
+                
+                <div class="margin-bottom-05" *ngIf="isNewDeposit">
+                  <strong class="margin-right-1">Saldo Actual:</strong>
+                  <span *ngIf="transactionCss.price">
+                    {{ transactionCss.transaction.client.balance  | COP }}
+                  </span>
+                </div>
+                <div class="margin-bottom-05" *ngIf="isNewDeposit">
+                  <strong class="margin-right-1">Nuevo Saldo:</strong>
+                  <span *ngIf="transactionCss.price">
+                    {{ transactionCss.transaction.client.balance -
+                    (transactionCss.price || 0) | COP }}
+                  </span>
+                </div>
+              </ion-label>
+            </ion-row>
+          </ion-col>
+        </ng-container>
+
+      </ion-row>
+    </ion-grid>
+  </ng-container>
+
+
+  <ion-list *ngIf="loading">
+    <ion-item>
+      <ion-label>
+        <ion-skeleton-text [animated]="true" style="width: 80%;"></ion-skeleton-text>
+      </ion-label>
+    </ion-item>
+    <ion-item>
+      <ion-label>
+        <ion-skeleton-text [animated]="true" style="width: 80%;"></ion-skeleton-text>
+      </ion-label>
+    </ion-item>
+  </ion-list>
+
+</ion-content>

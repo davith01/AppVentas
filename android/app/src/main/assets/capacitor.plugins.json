@@ -18,5 +18,13 @@
 	{
 		"pkg": "@capacitor/network",
 		"classpath": "com.capacitorjs.plugins.network.NetworkPlugin"
+	},
+	{
+		"pkg": "@capacitor/screen-orientation",
+		"classpath": "com.capacitorjs.plugins.screenorientation.ScreenOrientationPlugin"
+	},
+	{
+		"pkg": "@capawesome/capacitor-screen-orientation",
+		"classpath": "io.capawesome.capacitorjs.plugins.screenorientation.ScreenOrientationPlugin"
 	}
 ]

@@ -1,31 +1,31 @@
 [
-  { "id": 1, "date": "01/01/2024", "transaction": "Saldo", "quantity": 1, "price": 30110000 },
-  { "id": 2, "date": "02/01/2024", "transaction": "Abono", "quantity": 1, "price": -2000000 },
+  { "id": 1, "date": "01/01/2024", "transaction": "Saldo", "units": 1, "price": 30110000 },
+  { "id": 2, "date": "02/01/2024", "transaction": "Abono", "units": 1, "price": -2000000 },
   {
-    "id": 3, "date": "02/01/2024", "transaction": "Venta Platanos", "quantity": 55, "price": 90105000,
+    "id": 3, "date": "02/01/2024", "transaction": "Venta Platanos", "units": 55, "price": 90105000,
     "detail": [
-      { "date": "02/01/2024", "category": "Bolsas Segundas", "quantity": 10, "unitPrice": 13000 },
-      { "date": "02/01/2024", "category": "Picadas", "quantity": 10, "unitPrice": 12000 },
-      { "date": "02/01/2024", "category": "Buenas", "quantity": 10, "unitPrice": 13000 },
-      { "date": "02/01/2024", "category": "Bolsas Segundas", "quantity": 30, "unitPrice": 15000 }
+      { "date": "02/01/2024", "category": "Bolsas Segundas", "units": 10, "unitPrice": 13000 },
+      { "date": "02/01/2024", "category": "Picadas", "units": 10, "unitPrice": 12000 },
+      { "date": "02/01/2024", "category": "Buenas", "units": 10, "unitPrice": 13000 },
+      { "date": "02/01/2024", "category": "Bolsas Segundas", "units": 30, "unitPrice": 15000 }
     ]
   },
-  { "id": 4, "date": "03/01/2024", "transaction": "Abono", "quantity": 1, "price": -2000000 },
-  { "id": 5, "date": "04/01/2024", "transaction": "Abono", "quantity": 1, "price": -2000000 },
+  { "id": 4, "date": "03/01/2024", "transaction": "Abono", "units": 1, "price": -2000000 },
+  { "id": 5, "date": "04/01/2024", "transaction": "Abono", "units": 1, "price": -2000000 },
   {
-    "id": 6, "date": "05/01/2024", "transaction": "Venta Platanos", "quantity": 85, "price": 89730000,
+    "id": 6, "date": "05/01/2024", "transaction": "Venta Platanos", "units": 85, "price": 89730000,
     "detail": [
-      { "date": "05/01/2024", "category": "Bolsas Segundas", "quantity": 10, "unitPrice": 13000 },
-      { "date": "05/01/2024", "category": "Picadas", "quantity": 10, "unitPrice": 12000 },
-      { "date": "05/01/2024", "category": "Buenas", "quantity": 10, "unitPrice": 13000 },
-      { "date": "05/01/2024", "category": "Segundas", "quantity": 40, "unitPrice": 18000 }
+      { "date": "05/01/2024", "category": "Bolsas Segundas", "units": 10, "unitPrice": 13000 },
+      { "date": "05/01/2024", "category": "Picadas", "units": 10, "unitPrice": 12000 },
+      { "date": "05/01/2024", "category": "Buenas", "units": 10, "unitPrice": 13000 },
+      { "date": "05/01/2024", "category": "Segundas", "units": 40, "unitPrice": 18000 }
     ]
   },
   {
-    "id": 7, "date": "07/01/2024", "transaction": "Venta Platanos", "quantity": 30, "price": 94105000,
+    "id": 7, "date": "07/01/2024", "transaction": "Venta Platanos", "units": 30, "price": 94105000,
     "detail": [
-      { "date": "07/01/2024", "category": "Buenas", "quantity": 44, "unitPrice": 33000 },
-      { "date": "07/01/2024", "category": "Segundas", "quantity": 32, "unitPrice": 22000 }
+      { "date": "07/01/2024", "category": "Buenas", "units": 44, "unitPrice": 33000 },
+      { "date": "07/01/2024", "category": "Segundas", "units": 32, "unitPrice": 22000 }
     ]
   }
 ]

@@ -14,9 +14,11 @@ dependencies {
     implementation project(':capacitor-haptics')
     implementation project(':capacitor-keyboard')
     implementation project(':capacitor-network')
+    implementation project(':capacitor-screen-orientation')
+    implementation project(':capawesome-capacitor-screen-orientation')
 
 }
-
+apply from: "../../node_modules/cordova-plugin-fingerprint-aio/src/android/build.gradle"
 
 if (hasProperty('postBuildExtras')) {
   postBuildExtras()

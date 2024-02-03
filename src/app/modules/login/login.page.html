@@ -1,58 +1,78 @@
 <ion-content [fullscreen]="true">
 
+  <ion-modal id="fingerprint-modal" #modalFingerprint trigger="open-fingerprint-dialog">
+    <ng-template>
+      <ion-list class="margin-bottom-2">
+        <ion-item>
+          <ion-label class="ion-text-center margin-top-1 margin-bottom-1 padding-1">
+            <app-icon-logo [ngClass]="'margin-auto border-radius-0'"></app-icon-logo>
+            <h1 class="margin-top-1">Selecciona una cuenta</h1>
+            <p>para usar {{appName}}</p>
+          </ion-label>
+        </ion-item>
+        <ion-item (click)="onCacheLogin(userAuthCache)" *ngFor="let userAuthCache of listUserAuthCache">
+          <ion-avatar slot="start" *ngIf="userAuthCache.imageUrl">
+            <ion-img [src]="userAuthCache.imageUrl"></ion-img>
+          </ion-avatar>
+          <div *ngIf="!userAuthCache.imageUrl" slot="start" class="avatar-color"
+            [ngStyle]="{'background-color': userAuthCache.background}">
+            <span [ngStyle]="{'color': userAuthCache.color}"> {{userAuthCache.name.substring(0,1)}}</span>
+          </div>
+          <ion-label>
+            <h2>{{userAuthCache.name}}</h2>
+            <p>{{userAuthCache.email}}</p>
+          </ion-label>
+        </ion-item>
+      </ion-list>
+    </ng-template>
+  </ion-modal>
+
   <div class="middle-box">
-    <img class="logo-icon ion-padding" [src]="urlIconHtml" />
+
+    <ion-button fill="clear" (click)="onShowConfig()" class="config-button">
+      <fa-icon slot="icon-only" [icon]="faGear"></fa-icon>
+    </ion-button>
+
+    <app-icon-logo margin="auto" [ngClass]="'margin-left-auto margin-right-auto margin-top-1 margin-bottom-1 width-5 height-5'" ></app-icon-logo>
     <h3>Bienvenido a AppVentas</h3>
     <p>Iniciar Sesión</p>
-    
     <ion-button fill="outline" (click)="signInWithGoogle()" class="google-icon">
       <img src="assets/icon/Google.svg" />
       Ingresar con Google
     </ion-button>
-
-    <form class="ion-padding" novalidate [formGroup]="signinForm" (ngSubmit)="onLogin()">
-
-      <ion-item class="item-box">
-        <ion-input type="email" formControlName="email" label="Usuario"></ion-input>
-        <div class="validation-errors">
-          <ng-container *ngFor="let validation of validation_messages.email">
-            <div class="error-message"
-              *ngIf="signinForm.get('email')?.hasError(validation.type) && (signinForm.get('email')?.dirty || signinForm.get('email')?.touched)">
-              {{ validation.message }}
-            </div>
-          </ng-container>
-        </div>
-      </ion-item>
-
-      <ion-item class="item-box">
-        <ion-input type="password" formControlName="password" label="Contraseña"></ion-input>
-        <div class="validation-errors">
-          <ng-container *ngFor="let validation of validation_messages.password">
-            <div class="error-message"
-              *ngIf="signinForm.get('password')?.hasError(validation.type) && (signinForm.get('password')?.dirty || signinForm.get('password')?.touched)">
-              {{ validation.message }}
-            </div>
-          </ng-container>
-        </div>
-      </ion-item>
+    <br />
+    <div class="login-message margin-top-1">
+      O ingresa con tu correo
+    </div>
+    <br />
+    <form class="padding-2" novalidate [formGroup]="signinForm" (ngSubmit)="onLogin()">
+      <ion-input mode="md" label="Correo Electrónico" formControlName="email" [clearInput]="true"
+        label-placement="floating" fill="outline" placeholder="Ingresa tu Email">
+      </ion-input>
+      <br />
+      <ion-input mode="md" type="password" label="Contraseña" label-placement="floating" fill="outline"
+        formControlName="password" placeholder="Ingresa tu contraseña"></ion-input>
+      <br />
       <ion-button type="submit" [disabled]="!signinForm.valid" color="stable" class="item-box btn-primary" expand="full"
         fill="outline">
         Iniciar
       </ion-button>
-
     </form>
 
-    <div class="finger-print" *ngIf="showFingerPrint">
-      <ion-button shape="round" (click)="performBiometricVerification()" fill="outline" size="small" id="login-finger">
-        <ion-icon name="finger-print" slot="icon-only" ></ion-icon>
+    <div class="finger-print" [ngClass]="{'finger-print-hidden': listUserAuthCache.length === 0 }">
+      <ion-button [ngClass]="{'finger-print-hidden': listUserAuthCache.length === 0 }" shape="round"
+        id="open-fingerprint-dialog" fill="outline" size="small">
+        <ion-icon [ngClass]="{'finger-print-hidden': listUserAuthCache.length === 0 }" name="finger-print"
+          slot="icon-only"></ion-icon>
       </ion-button>
-      <br/><br/>
-      <ion-label>Ingresa con huella isFingerprintAvailable:{{isFingerprintAvailable}}</ion-label>
+      <br /><br />
+      <ion-label>Trabajando sin conexión</ion-label>
+
     </div>
-    <br/><br/>
+    <br /><br />
     <small>© 2024</small>
-    <br/>
-    <br/>
+    <br />
+    <br />
   </div>
 
 </ion-content>

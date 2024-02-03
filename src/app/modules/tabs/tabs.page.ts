@@ -1,4 +1,7 @@
 import { Component, OnInit } from '@angular/core';
+import { DialogService } from '@app/services';
+import { faGear } from '@fortawesome/free-solid-svg-icons';
+import { ActionSheetButton, AlertOptions } from '@ionic/angular';
 
 @Component({
   selector: 'app-tabs',
@@ -8,9 +11,28 @@ import { Component, OnInit } from '@angular/core';
 export class TabsPage implements OnInit {
 
   newAgenda: boolean = false;
+  faGear = faGear;
 
-  constructor( ) { }
+  constructor(private dialogService: DialogService) { }
 
-  async ngOnInit() {
+  ngOnInit() {
+  }
+
+  async showConfigOption() {
+    const buttons: ActionSheetButton[] = [
+      {
+        text: 'Catálogo de productos',
+        data: {
+          action: 'delete',
+        },
+      },
+      {
+        text: 'Icono y nombre',
+        data: {
+          action: 'share',
+        },
+      }
+    ];
+    await this.dialogService.showActionSheet(buttons,'Configuración');
   }
 }

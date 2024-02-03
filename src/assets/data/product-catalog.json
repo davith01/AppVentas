@@ -1,0 +1,10 @@
+[
+    {
+      "id": 1,
+      "name": "Venta de Platanos",
+      "product": {
+        "id": 1,
+        "name": "Platano"
+      }
+    }
+  ]

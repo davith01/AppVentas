@@ -1,44 +1,51 @@
 import { Component, NgZone, OnInit } from '@angular/core';
-import { FirebaseAuthenticationService } from './core';
+import { AuthType, FirebaseAuthenticationService, fadeAnimation } from './core';
 import { animate, state, style, transition, trigger } from '@angular/animations';
 import { AlertController, NavController } from '@ionic/angular';
 import { StorageService } from './services';
 import { ConnectionStatus, Network } from '@capacitor/network';
 import { register } from 'swiper/element/bundle';
 import { ScreenOrientation, OrientationType } from '@capawesome/capacitor-screen-orientation';
+import { faGear,faGears,faIcons } from '@fortawesome/free-solid-svg-icons';
+import { Router } from '@angular/router';
 
 register();
+
+const routerOutlet = trigger('router-outlet', [
+  state('show', style({
+    top: '2.5rem',
+  })),
+  state('hidden', style({
+    top: '0',
+  })),
+  transition('show => hidden', animate('1000ms ease-in-out')),
+  transition('hidden => show', animate('1000ms ease-in-out')),
+]);
 
 @Component({
   selector: 'app-root',
   templateUrl: 'app.component.html',
   styleUrls: ['app.component.scss'],
-  animations: [
-    trigger('router-outlet', [
-      state('show', style({
-        top: '2.5rem',
-      })),
-      state('hidden', style({
-        top: '0',
-      })),
-      transition('show => hidden', animate('1000ms ease-in-out')),
-      transition('hidden => show', animate('1000ms ease-in-out')),
-    ])
-  ]
+  animations: [routerOutlet, fadeAnimation ]
 })
 export class AppComponent implements OnInit {
 
   pageSelected: string = '';
   animationState: String = 'hidden';
   networkStatus: boolean = false;
+  faGear = faGear;
+  faGears = faGears;
+  faIcons = faIcons;
+  isConfigMenuOpen = false;
 
   constructor(
     private readonly firebaseAuthenticationService: FirebaseAuthenticationService,
     private readonly navCtrl: NavController,
     private readonly storageService: StorageService,
     private readonly alertController: AlertController,
-    private readonly zone: NgZone) {
-
+    private readonly zone: NgZone,
+    private readonly router: Router,
+  ) {
     this.initializeApp();
     this.initNetworkStatus();
   }
@@ -52,16 +59,20 @@ export class AppComponent implements OnInit {
   }
 
   async onLogout() {
-    //emit value for the page change
-    //this.pageSelectedEvent.setEvent('login');
+
+    const userAuth = await this.storageService.getUserAuth();
+    if (userAuth?.authType == AuthType.GoogleAuth) {
+      await this.firebaseAuthenticationService.signOut();
+    }
+
     //remove the cache data
-    this.storageService.removeUserAuth();
+    await this.storageService.removeUserAuth();
 
-    await this.firebaseAuthenticationService.signOut();
-
-    //redirect to login page
-    this.navCtrl.navigateRoot('/login');
+    //redirect to login page    
+    await this.navCtrl.navigateRoot('/login');
+    await this.router.navigate(['/login'], { replaceUrl: true });
   }
+
 
   async presentAlerLogout() {
     const alert = await this.alertController.create({
@@ -108,4 +119,7 @@ export class AppComponent implements OnInit {
     });
   }
 
+  menuWillClose(){
+    this.isConfigMenuOpen = false;
+  }
 }

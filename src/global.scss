@@ -25,8 +25,36 @@
 @import "~@ionic/angular/css/text-transformation.css";
 @import "~@ionic/angular/css/flex-utils.css";
 
+@import '~@fortawesome/fontawesome-free/css/all.css';
+
 .display-flex {
-    display: flex;
+    display: flex !important;
+}
+
+.margin-auto {
+    margin: auto !important;
+}
+
+.color-gray {
+    color: gray !important;
+}
+
+.background-color-light-blue {
+    background-color: #DDEBF7;
+}
+
+ion-backdrop {
+    background: var(--ion-color-dark);
+    opacity: 0.3;
+    --fixed: 100%;
+}
+
+ion-modal#fingerprint-modal {
+    --width: fit-content;
+    --min-width: 19rem;
+    --height: fit-content;
+    --border-radius: 1rem;
+    --box-shadow: 0 28px 48px rgba(0, 0, 0, 0.4);
 }
 
 @for $i from -10 through 50 {
@@ -71,4 +99,148 @@
     .margin-bottom-#{$i} {
         margin-bottom: $remValue !important;
     }
+}
+
+@for $i from 1 through 9 {
+    $remValue: $i * 0.1rem;
+
+    .margin-0#{$i} {
+        margin: $remValue !important;
+    }
+
+    .margin-left-0#{$i} {
+        margin-left: $remValue !important;
+    }
+
+    .margin-right-0#{$i} {
+        margin-right: $remValue !important;
+    }
+
+    .margin-top-0#{$i} {
+        margin-top: $remValue !important;
+    }
+
+    .margin-bottom-0#{$i} {
+        margin-bottom: $remValue !important;
+    }
+}
+
+
+.magin-auto {
+    margin: auto !important;
+}
+
+.margin-left-auto {
+    margin-left: auto !important;
+}
+
+.margin-right-auto {
+    margin-right: auto !important;
+}
+
+.margin-top-auto {
+    margin-top: auto !important;
+}
+
+.margin-bottom-auto {
+    margin-bottom: auto !important;
+}
+
+.border-radius-0 {
+    border-radius: 0;
+    --border-radius: 0;
+}
+
+.width-100 {
+    width: 100%;
+}
+
+@for $i from 1 through 10 {
+    $remValue: $i * 1rem;
+    .width-#{$i} {
+        width: $remValue !important;
+    }
+    .height-#{$i} {
+        height: $remValue !important;
+    }
+}
+
+
+
+ion-datetime::part(month-year-button) {
+    color: #831843;
+}
+
+ion-datetime-button.empty::part(native) {
+    color: transparent;
+}
+
+ion-datetime {
+
+    --ion-color-rose: #831843;
+    --ion-color-rose-rgb: 131, 24, 67;
+    --ion-color-rose-contrast: #ffffff;
+    --ion-color-rose-contrast-rgb: 255, 255, 255;
+    --ion-color-rose-shade: #73153b;
+    --ion-color-rose-tint: #8f2f56;
+
+    --ion-text-color: #881337;
+    --ion-text-color-rgb: 136, 19, 55;
+
+    --ion-color-step-50: #f9e6e9;
+    --ion-color-step-100: #f3dbdf;
+    --ion-color-step-150: #edd0d6;
+    --ion-color-step-200: #e7c5cd;
+    --ion-color-step-250: #e1bac3;
+    --ion-color-step-300: #dbaeba;
+    --ion-color-step-350: #d5a3b1;
+    --ion-color-step-400: #cf98a7;
+    --ion-color-step-450: #c98d9e;
+    --ion-color-step-500: #c48295;
+    --ion-color-step-550: #be778b;
+    --ion-color-step-600: #b86c82;
+    --ion-color-step-650: #b26178;
+    --ion-color-step-700: #ac566f;
+    --ion-color-step-750: #a64b66;
+    --ion-color-step-800: #a03f5c;
+    --ion-color-step-850: #9a3453;
+    --ion-color-step-900: #94294a;
+    --ion-color-step-950: #8e1e40;
+
+
+    --background: #fff1f2;
+    --background-rgb: 255, 241, 242;
+    color: var(--ion-text-color);
+    border-radius: 16px;
+    box-shadow: rgba(var(--ion-color-rose-rgb), 0.3) 0px 10px 15px -3px;
+
+
+    --ion-color-base: var(--ion-color-rose);
+    --ion-color-base-rgb: var(--ion-color-rose-rgb);
+    --ion-color-contrast: var(--ion-color-rose-contrast);
+    --ion-color-contrast-rgb: var(--ion-color-rose-contrast-rgb);
+    --ion-color-shade: var(--ion-color-rose-shade);
+    --ion-color-tint: var(--ion-color-rose-tint);
+}
+
+.col-size-1_5 {
+    flex: 0 0 calc(calc(1.5 / var(--ion-grid-columns, 12)) * 100%) !important;
+    width: calc(calc(1.5 / var(--ion-grid-columns, 12)) * 100%) !important;
+    max-width: calc(calc(1.5 / var(--ion-grid-columns, 12)) * 100%) !important;
+}
+.col-size-2_5 {
+    flex: 0 0 calc(calc(2.5 / var(--ion-grid-columns, 12)) * 100%) !important;
+    width: calc(calc(2.5 / var(--ion-grid-columns, 12)) * 100%) !important;
+    max-width: calc(calc(2.5 / var(--ion-grid-columns, 12)) * 100%) !important;
+}
+.col-size-3_5 {
+    flex: 0 0 calc(calc(3.5 / var(--ion-grid-columns, 12)) * 100%) !important;
+    width: calc(calc(3.5 / var(--ion-grid-columns, 12)) * 100%) !important;
+    max-width: calc(calc(3.5 / var(--ion-grid-columns, 12)) * 100%) !important;
+}
+
+.col-size-4_5 {
+    flex: 0 0 calc(calc(4.5 / var(--ion-grid-columns, 12)) * 100%) !important;
+    width: calc(calc(4.5 / var(--ion-grid-columns, 12)) * 100%) !important;
+    max-width: calc(calc(4.5 / var(--ion-grid-columns, 12)) * 100%) !important;
 }

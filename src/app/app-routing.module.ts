@@ -6,23 +6,19 @@ const routes: Routes = [
   {
     path: 'login',
     loadChildren: () =>
-      import('./modules/login/login.module').then((m) => m.LoginPageModule),
+    import('./modules/login/login.module').then((m) => m.LoginPageModule),
     canActivate: [NoAuthGuard],
   },
   {
-    path: 'home',
-    loadChildren: () =>
-      import('./modules/home/home.module').then((m) => m.HomePageModule),
-    canActivate: [AuthGuard],
-  },
-  {
     path: 'client-detail',
-    loadChildren: () => import('./modules/client-detail/client-detail.module').then( m => m.ClientDetailPageModule)
+    loadChildren: () => import('./modules/client-detail/client-detail.module').then(m => m.ClientDetailPageModule),
+    canActivate: [AuthGuard],
   },
   {
     path: '',
     loadChildren: () => import('./modules/tabs/tabs.module').then(m => m.TabsPageModule)
-  },
+  }
+
 ];
 
 @NgModule({
@@ -31,4 +27,4 @@ const routes: Routes = [
   ],
   exports: [RouterModule],
 })
-export class AppRoutingModule {}
+export class AppRoutingModule { }

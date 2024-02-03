@@ -11,5 +11,6 @@ const firebaseConfig = {
 export const environment = {
   production: true,
   firebase: firebaseConfig,
+  appName: 'appVentas',
   urlIcon: 'assets/icon/default-icon.png'
 };

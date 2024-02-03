@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import {
+  ActionSheetController,
   AlertController,
   LoadingController,
   ModalController,
@@ -11,6 +12,7 @@ import {
   LoadingOptions,
   ModalOptions,
   PopoverOptions,
+  ActionSheetButton
 } from '@ionic/core';
 
 @Injectable({
@@ -23,6 +25,7 @@ export class DialogService {
     private loadingCtrl: LoadingController,
     private popoverCtrl: PopoverController,
     private toastCtrl: ToastController,
+    private actionSheetCtrl: ActionSheetController
   ) {}
 
   public async showAlert(opts?: AlertOptions): Promise<HTMLIonAlertElement> {
@@ -100,5 +103,13 @@ export class DialogService {
       duration: 2000
     });
     toast.present();
+  }
+
+  public async showActionSheet(buttons:ActionSheetButton[],header?:string){
+    const actionSheet = await this.actionSheetCtrl.create({
+      header: header,
+      buttons: buttons
+    });
+    await actionSheet.present();
   }
 }

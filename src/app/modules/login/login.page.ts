@@ -1,12 +1,15 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { Router } from '@angular/router';
-import { DialogService, FirebaseAuthenticationService } from '@app/core';
+import { DialogService, FirebaseAuthenticationService, UserAuth } from '@app/core';
 import { StorageService, UsersService } from '@app/services';
 import { environment } from '@env/environment';
-import { FingerprintAIO } from '@awesome-cordova-plugins/fingerprint-aio/ngx';
-import { Platform } from '@ionic/angular';
+import { FingerprintAIO } from '@awesome-cordova-plugins/fingerprint-aio';
+import { AlertButton, AlertInput, AlertOptions, IonModal, Platform } from '@ionic/angular';
+import { SignInResult } from '@capacitor-firebase/authentication';
+import { faGear } from '@fortawesome/free-solid-svg-icons';
+import { RedirectService } from '@app/services/redirect/redirect.service';
 
 @Component({
   selector: 'app-login',
@@ -15,9 +18,14 @@ import { Platform } from '@ionic/angular';
 })
 export class LoginPage implements OnInit {
 
-  showFingerPrint = true;
   urlIcon: string = '';
+  faGear = faGear;
   urlIconHtml: SafeHtml | undefined;
+  presentingElement: any;
+  appName = environment.appName;
+  labelConfigInput = 'http://localhost/';
+
+  @ViewChild('modalFingerprint', { static: true }) modalFingerprint: IonModal | undefined;
 
   EMAILPATTERN = /^[a-z0-9!#$%&'*+\/=?^_`{|}~.-]+@[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)*$/i;
   signinForm = new FormGroup({
@@ -37,6 +45,8 @@ export class LoginPage implements OnInit {
   };
 
   isFingerprintAvailable: string | undefined;
+  listUserAuthCache = [];
+  loadingPreviousLogin: HTMLIonLoadingElement | undefined;
 
   constructor(
     private readonly firebaseAuthenticationService: FirebaseAuthenticationService,
@@ -46,27 +56,52 @@ export class LoginPage implements OnInit {
     private readonly storageService: StorageService,
     private sanitizer: DomSanitizer,
     private platform: Platform,
-    private fingerprintAIO: FingerprintAIO
-  ) { }
+    private redirectService: RedirectService
+  ) {
+    this.initializeConfigProxy();
+  }
 
-  public async ngOnInit() {
-    this.urlIcon = await this.storageService.getUrlIcon();
+  async ngOnInit() {
+
+    //Permite abrir el modal que muestra los usuarios que ya tienen una cache asociada
+    this.presentingElement = document.querySelector<HTMLElement>('.ion-page');
+
+    this.storageService.getUrlIcon().subscribe((urlIcon) => {
+      this.urlIcon = urlIcon;
+    });
+    
     this.urlIcon = this.urlIcon || environment.urlIcon;
     this.urlIconHtml = this.sanitizer.bypassSecurityTrustUrl(this.urlIcon);
-    if (this.platform.is('capacitor')) {
-      this.fingerprintAIO.isAvailable().then((result) => {
-        //'finger' | 'face' | 'biometric'
-        this.isFingerprintAvailable = result;
-        }).catch((err) => {
-        console.log({ err });
-      });
-    }   
 
-    this.firebaseAuthenticationService.getRedirectResult().then((result) => {
-      if (result?.user) {
-        this.goToHome();
-      }
-    });
+    this.initializeAuthCache();
+    const isPreviousLogin: boolean = await this.storageService.isPreviousLogin();
+    if (isPreviousLogin) {
+      this.loadingPreviousLogin = await this.dialogService.showLoading();
+      await this.storageService.setIsPreviousLogin(!isPreviousLogin);
+    }
+
+    this.firebaseAuthenticationService.getRedirectResult()
+      .then(async (singIn: SignInResult | undefined) => {
+        //Google Authentication success
+        if (singIn && singIn.user && singIn.user.emailVerified) {
+
+          this.usersService.loginWithGoogle(singIn.user)
+            .then(async (userAuth: UserAuth) => {
+              //Login Authentication success
+              this.loadingPreviousLogin?.dismiss();
+              this.goToHome();
+            }, (error) => {
+              this.loadingPreviousLogin?.dismiss();
+              this.dialogService.showMessage(JSON.stringify(error));
+            }).catch((e)=>{
+              this.loadingPreviousLogin?.dismiss();
+              this.dialogService.showMessage(JSON.stringify(e));
+            });
+        }
+        else {
+          this.loadingPreviousLogin?.dismiss();
+        }
+      });
 
     this.firebaseAuthenticationService.phoneVerificationCompleted$.subscribe(
       () => this.goToHome()
@@ -85,21 +120,32 @@ export class LoginPage implements OnInit {
             verificationCode,
             verificationId: event.verificationId,
           });
+          await loadingElement?.dismiss();
           await this.goToHome();
         } finally {
           await loadingElement?.dismiss();
         }
-      }
-    );
+      });
+
+    if (this.platform.is('capacitor')) {
+      FingerprintAIO.isAvailable()
+        .then(result => {
+          this.isFingerprintAvailable = result;
+        })
+        .catch(err => { console.log(err); this.dialogService.showMessage(JSON.stringify(err)) });
+    }
+
   }
 
-  performBiometricVerification() {
-    this.fingerprintAIO.show({
-      disableBackup: true
-    })
-    .then((result: any) => this.dialogService.showErrorAlert(result))
-    .catch((error: any) => this.dialogService.showErrorAlert(error));
-
+  async initializeConfigProxy() {
+    let valueInput = '';
+    const config = await this.storageService.getConfig();
+    if (config) {
+      valueInput = config;
+    }
+    else {
+      await this.storageService.setConfig(this.labelConfigInput);
+    }
   }
 
   public async signInWithApple(): Promise<void> {
@@ -115,7 +161,18 @@ export class LoginPage implements OnInit {
   }
 
   public async signInWithGoogle(): Promise<void> {
-    await this.signInWith(SignInProvider.google);
+   
+    await this.storageService.setIsPreviousLogin(true);
+
+    this.signInWith(SignInProvider.google).then((e) =>  alert(e), (e) => {
+
+      if (JSON.stringify(e).includes('network-request-failed')) {
+        this.dialogService.showErrorAlert({ header: 'Error de conexión', message: 'invocando el servicio de Google' });
+      }
+      else {
+        this.dialogService.showErrorAlert({ message: e });
+      }
+    });
   }
 
   public async signInWithMicrosoft(): Promise<void> {
@@ -223,30 +280,142 @@ export class LoginPage implements OnInit {
     if (this.signinForm.valid) {
 
       const loadingElement = await this.dialogService.showLoading();
-      let userAuth = { 'email': this.signinForm.value.email, 'password': this.signinForm.value.password };
+
+      const email = this.signinForm.value.email || '';
+      const password = this.signinForm.value.password || '';
 
       // Invoque the services login 
-      this.usersService.login(userAuth)
-        .then(async (response: any) => {
-
+      this.usersService.login(email, password)
+        .then((userAuth: UserAuth) => {
           loadingElement.dismiss();
-
-          if (response.data && response.data.login) {
-            userAuth = Object.assign(userAuth, response.data.login);
-            await this.storageService.setUserAuth(userAuth);
-            this.goToHome();
-          }
+          this.goToHome();
         }, (error) => {
           loadingElement.dismiss();
-          this.dialogService.showMessage('No se puede iniciar sesion');
+          this.dialogService.showMessage(JSON.stringify(error));
         });
     }
   }
 
   private async goToHome(): Promise<void> {
-    await this.router.navigate(['/tabs/tab1'], { replaceUrl: true });
+    //await this.router.navigate(['/tabs/tab1'], { replaceUrl: true });
+    this.redirectService.redirectTo('/tabs/tab1');
   }
 
+
+  /**
+ * Performs biometric verification using FingerprintAIO.
+ * It shows the fingerprint authentication dialog with specified options.
+ */
+  async initializeAuthCache() {
+    const list = await this.storageService.getUserAuthList();
+    if (list) {
+      this.listUserAuthCache = list.map((authCache: any) => {
+        return Object.assign(authCache, {
+          imageUrlSafe: this.sanitizer.bypassSecurityTrustResourceUrl(authCache.imageUrl)
+        });
+      });
+    }
+  }
+
+  onFingerPrint(userAuthCache: UserAuth) {
+
+    FingerprintAIO.show({
+      disableBackup: true,
+      cancelButtonTitle: 'Cancelar'
+    })
+      .then(async (result: any) => {
+
+        const loadingElement = await this.dialogService.showLoading();
+        await this.storageService.setUserAuth(userAuthCache);
+        loadingElement.dismiss();
+        this.goToHome();
+
+      })
+      .catch((error: any) => this.dialogService.showErrorAlert(error));
+  }
+
+  onPinAuth(userAuthCache: UserAuth) {
+    let op: AlertOptions = {
+      message: 'Ingresa tu PIN de acceso',
+      inputs: [{
+        type: 'number',
+        placeholder: 'PIN (max 4 caracteres)',
+        min: 1000,
+        max: 9999,
+      }
+      ],
+      buttons: [
+        {
+          text: 'Cancelar',
+          role: 'cancel',
+          handler: () => {
+            console.log('Alert canceled');
+          },
+        },
+        {
+          text: 'Entrar',
+          role: 'confirm',
+          handler: async (data: any) => {
+            if (data[0] == userAuthCache.pin) {
+              const loadingElement = await this.dialogService.showLoading();
+              await this.storageService.setUserAuth(userAuthCache);
+              loadingElement.dismiss();
+              this.goToHome();
+            }
+            else {
+              this.dialogService.showMessage('Pin incorrecto, por favor intenta de nuevo');
+            }
+          },
+        },
+      ]
+    }
+    this.dialogService.showInputAlert(op)
+  }
+
+  onCacheLogin(userAuthCache: UserAuth) {
+
+    this.modalFingerprint?.dismiss();
+
+    if (this.isFingerprintAvailable) {
+      this.onFingerPrint(userAuthCache);
+    } else {
+      this.onPinAuth(userAuthCache);
+    }
+  }
+
+  async onShowConfig() {
+    const urlConfigCache = await this.storageService.getConfig();
+    this.dialogService.showAlert({
+      inputs: [
+        {
+          placeholder: this.labelConfigInput,
+          value: urlConfigCache
+        }
+      ],
+      buttons: [
+        {
+          text: 'Cancelar',
+          role: 'cancel',
+          handler: () => {
+            console.log('Alert canceled');
+          },
+        },
+        {
+          text: 'OK',
+          role: 'confirm',
+          handler: async (data: any) => {
+            if (data && data[0]) {
+              this.labelConfigInput = data[0];
+              await this.storageService.setConfig(this.labelConfigInput);
+            }
+            else {
+              this.dialogService.showErrorAlert({ message: 'El campo no puede estar vacio' });
+            }
+          },
+        },
+      ]
+    });
+  }
 }
 
 enum SignInProvider {

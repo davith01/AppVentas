@@ -1,5 +1,5 @@
 <ion-app>
-  <ion-menu side="start" content-id="main-content" *ngIf="pageSelected!='login'">
+  <ion-menu side="end" (ionWillClose)="menuWillClose()"  content-id="main-content" *ngIf="pageSelected!='login'">
     <ion-header>
       <ion-toolbar color="primary">
         <ion-title>Menu</ion-title>
@@ -22,11 +22,30 @@
         </ion-menu-toggle>
 
         <ion-menu-toggle>
-          <ion-item routerLink="/tabs/tab3" routerDirection="forward">
-            <ion-icon name="options-outline" slot="start"></ion-icon>
-            <ion-label>Configuración</ion-label>
+          <ion-item routerLink="/tabs/deposit" routerDirection="forward">
+            <ion-icon name="cash-outline" slot="start"></ion-icon>
+            <ion-label>Abonos</ion-label>
           </ion-item>
         </ion-menu-toggle>
+
+
+        <ion-item detail="true" [button]="true" (click)="isConfigMenuOpen = !isConfigMenuOpen">
+          <!--ion-icon name="options-outline" slot="start"></ion-icon-->
+          <fa-icon aria-hidden="true" [icon]="faGear"></fa-icon>
+          <ion-label>Configuración</ion-label>
+        </ion-item>
+        <ion-list *ngIf="isConfigMenuOpen" @fadeAnimation>
+          <ion-menu-toggle>
+            <ion-item class="margin-left-1" detail="true" [button]="true">
+              <fa-icon class="small" aria-hidden="true" [icon]="faGear"></fa-icon>
+              <ion-label>Icono y nombre</ion-label>
+            </ion-item>
+            <ion-item class="margin-left-1" detail="true" [button]="true">
+              <fa-icon class="small" aria-hidden="true" [icon]="faGear"></fa-icon>
+              <ion-label>Catálogo de productos</ion-label>
+            </ion-item>
+          </ion-menu-toggle>
+        </ion-list>
 
         <ion-menu-toggle>
           <ion-item (click)="presentAlerLogout()" button>
@@ -41,8 +60,7 @@
 
   <app-network-status (networkStatusChange)="onNetworkStatusChange($event)"></app-network-status>
 
-  <ion-router-outlet [ngStyle]="{'top': networkStatus ? '2.5rem': '2.5rem'}" 
-    [@router-outlet]="animationState"
+  <ion-router-outlet [ngStyle]="{'top': networkStatus ? '2.5rem': '2.5rem'}" [@router-outlet]="animationState"
     id="main-content"></ion-router-outlet>
 
 </ion-app>

@@ -1,8 +1,7 @@
 import { Component } from '@angular/core';
-import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { DomSanitizer } from '@angular/platform-browser';
 import { Router } from '@angular/router';
-import { StorageService } from '@app/services';
-import { environment } from '@env/environment';
+import { ScreenSize, ScreenSizeService, StorageService } from '@app/services';
 
 declare var cloudinary: any;
 
@@ -15,20 +14,25 @@ export class Tab3Page {
   cloudName = "dfxkgtknu"; // replace with your own cloud name
   uploadPreset = "hlwfoelv"; // replace with your own upload preset
   myWidget: any;
-  urlIcon: string = '';
-  urlIconHtml: SafeHtml | undefined;
+  isLandscape = false;
+  isSmallScreen = false;
 
   constructor(
     private router: Router,
     private storageService: StorageService,
-    private sanitizer: DomSanitizer
+    private screenSizeService: ScreenSizeService
   ) { }
 
   async ngOnInit() {
 
-    this.urlIcon = await this.storageService.getUrlIcon();
-    this.urlIcon = this.urlIcon || environment.urlIcon;
-    this.urlIconHtml = this.sanitizer.bypassSecurityTrustUrl(this.urlIcon);
+    this.isLandscape = this.screenSizeService.isLandscape;
+    this.isSmallScreen = this.screenSizeService.isSmallScreen;
+    
+    // Suscribe al observable del servicio para recibir actualizaciones sobre el tamaño de la pantalla
+    this.screenSizeService.isLandscape$.subscribe((screenSize:ScreenSize) => {
+      this.isLandscape = screenSize.isLandscape;
+      this.isSmallScreen = screenSize.isSmallScreen;
+    });
 
     this.myWidget = cloudinary.createUploadWidget(
       {
@@ -50,9 +54,7 @@ export class Tab3Page {
         if (!error && result && result.event === "success") {
           console.log("Done! Here is the image info: ", result.info);
 
-          this.urlIcon = result.info.secure_url;
-          this.storageService.setUrlIcon(this.urlIcon);
-          this.urlIconHtml = this.sanitizer.bypassSecurityTrustUrl(this.urlIcon);
+          this.storageService.setUrlIcon(result.info.secure_url);
         }
       }
     );

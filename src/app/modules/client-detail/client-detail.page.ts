@@ -1,127 +1,148 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { trigger, transition, style, animate, query, stagger } from '@angular/animations';
 import { ModalController, IonModal, AlertController, ToastController, IonPopover, IonContent } from '@ionic/angular';
 import * as moment from 'moment';
-import { ClientService, ClientTransaction, ScreenSizeService, SortState, StorageService, TransactionType, TransactionTypeService } from '@app/services';
+import { DeliveryService, DialogService, ScreenSize, ScreenSizeService, StorageService } from '@app/services';
 import { TransactionDebtFormComponent } from '../transaction-debt-form/transaction-debt-form.component';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { environment } from '@env/environment';
+import { Transaction, SortState, TransactionType, fadeAnimation, UserAuth, Client, TransactionDetail } from '@app/core';
 
-
-const listAnimation = trigger('listAnimation', [
-  transition('* <=> *', [
-    query(':enter',
-      [style({ opacity: 0 }), stagger('100ms', animate('500ms ease-out', style({ opacity: 1 })))],
-      { optional: true }
-    ),
-    query(':leave',
-      animate('500ms', style({ opacity: 0 })),
-      { optional: true }
-    )
-  ])
-]);
-
-export const fadeAnimation = trigger('fadeAnimation', [
-  transition(':enter', [
-    style({ opacity: 0, height: '0', }),
-    animate('200ms ease-out', style({ opacity: 1, height: '*' }))]
-  ),
-  transition(':leave',
-    [style({ opacity: 1, height: '*' }), animate('300ms', style({ opacity: 0, height: '0', }))]
-  )
-]);
+interface TransactionCss {
+  date: string;
+  transactions: Transaction[];
+};
 
 @Component({
   selector: 'app-client-detail',
   templateUrl: './client-detail.page.html',
   styleUrls: ['./client-detail.page.scss'],
-  animations: [listAnimation, fadeAnimation],
+  animations: [fadeAnimation],
 })
 export class ClientDetailPage implements OnInit {
 
-  clientId: string = '';
-  client: any;
-  urlIcon: string = '';
-  urlIconHtml: SafeHtml | undefined;
-
-  clickedRows = new Set<ClientTransaction>();
-  dataClientTransaction: (ClientTransaction)[] | undefined;
-  dataClientTransactionOri: (ClientTransaction)[] | undefined;
-  sortState: SortState = { field: 'date', direction: 'desc' };
+  clientId: number | undefined;
+  client: Client | undefined;
+  transactionsOri: Transaction[] | undefined;
+  clickedRows = new Set<Transaction>();
+  dataTransactionsCss: TransactionCss[] = [];
+  sortState: SortState = { field: 'date', direction: 'asc' };
   detailSalesSelected: number = 0;
   transactionTypes: TransactionType[] | undefined;
   isLandscape = false;
-  
+  isSmallScreen = false;
+  filterDateStart: Date | undefined;
+  filterDateEnd: Date | undefined;
+
+  showDateFilter = false;
+  filterDate = '';
+  screenHeight = 0;
+  lastTrx: number | undefined;
+
   @ViewChild(IonModal) modal: IonModal | undefined;
   @ViewChild('popoverTransaction') popoverTransaction: IonPopover | undefined;
+ 
 
   constructor(
     private activatedRoute: ActivatedRoute,
-    private clientService: ClientService,
-    private modalController: ModalController,
-    private transactionTypeService: TransactionTypeService,
-    private toastController: ToastController,
+    private deliveryServices: DeliveryService,
     private storageService: StorageService,
-    private sanitizer: DomSanitizer,
-    private screenSizeService: ScreenSizeService
+    private screenSizeService: ScreenSizeService,
+    private dialogService: DialogService,
+    private modalController: ModalController,
+    private toastController: ToastController
   ) {
-
-
+    this.checkScreenSize();
+    window.addEventListener('resize', () => this.checkScreenSize());
   }
 
   async ngOnInit() {
 
+    this.screenHeight = window.innerHeight || document.documentElement.clientWidth || document.body.clientWidth;
+
+    this.isLandscape = this.screenSizeService.isLandscape;
     // Suscribe al observable del servicio para recibir actualizaciones sobre el tamaño de la pantalla
-    this.screenSizeService.isLandscape$.subscribe((isLandscape) => {
-      this.isLandscape = isLandscape;
+    this.screenSizeService.isLandscape$.subscribe((screenSize:ScreenSize) => {
+      this.isLandscape = screenSize.isLandscape;
+      this.screenHeight = window.innerHeight || document.documentElement.clientWidth || document.body.clientWidth;
+
+      let offsetHeight_0 = (document.getElementById('div-0')?.offsetHeight) || 0;
+      let offsetHeight_1 = (document.getElementById('div-1')?.offsetHeight) || 0;
+      let offsetHeight_2 = (document.getElementById('div-2')?.offsetHeight) || 0;
+      this.screenHeight = this.screenHeight - offsetHeight_0 - offsetHeight_1 - offsetHeight_2;
+      this.screenHeight -= 30;
+
     });
 
-    this.urlIcon = await this.storageService.getUrlIcon();
-    this.urlIcon = this.urlIcon || environment.urlIcon;
-    this.urlIconHtml = this.sanitizer.bypassSecurityTrustUrl(this.urlIcon);
-
-    this.transactionTypes = await this.transactionTypeService.getList();
+    const userAuth = await this.storageService.getUserAuth() as UserAuth;
+    this.transactionTypes = await this.storageService.getTransactionTypes(userAuth) as TransactionType[];
+    const clients = await this.storageService.getClients(userAuth) as Client[];
 
     // Retrieve parameters from the URL
-    this.activatedRoute.queryParams.subscribe((params) => {
+    this.activatedRoute.queryParams.subscribe(async (params) => {
 
       this.clientId = params['clientId'];
-      this.clientService.getClient(this.clientId)
-        .then((response: any) => {
-          this.client = response.data;
+
+      if (this.clientId) {
+        this.clientId = Number(this.clientId);
+        this.client = clients.find((client) => client.id == this.clientId);
+        this.transactionsOri = await this.deliveryServices.getTransactionsByClient(this.clientId);
+
+        this.renderSort();
+        let balance = 0;
+      
+        this.transactionsOri?.forEach((tx: Transaction) => {
+          this.lastTrx = tx.id;
+          tx.balanceBefore = balance;
+          balance += (tx.transactionsDetail ? tx.price : tx.price * tx.units);
+          tx.balanceAfter = balance;
         });
 
-      this.clientService.getClientTransaction(this.clientId)
-        .then((response: any) => {
-          this.dataClientTransaction = response.data;
-          this.dataClientTransactionOri = response.data;
-          this.renderSort();
-        });
+        this.setDataTransactionsCss(this.transactionsOri);
+      }
 
     });
   }
 
+  // Método para verificar el tamaño de la pantalla 
+  checkScreenSize() {
+    this.isSmallScreen = window.innerWidth <= 460;
+  }
+
   getTotalCost() {
-    if (this.dataClientTransactionOri)
-      return this.dataClientTransactionOri.map(t => t.price).reduce((acc, value) => acc + value, 0);
-    else return 0;
+    let total = 0;
+    if (this.transactionsOri)
+      this.transactionsOri.forEach((transaction) => {
+        if (transaction.transactionsDetail && transaction.transactionsDetail.length > 0) {
+          for (let detail of transaction.transactionsDetail) {
+            total += detail.price * detail.units;
+          }
+        }
+        else {
+          total += transaction.price * transaction.units;
+        }
+      });
+    return total;
   }
 
   isNegative(value: number): boolean {
     return value < 0;
   }
 
-  showTransactionDetail(element: ClientTransaction) {
+  showTransactionDetail(element: Transaction) {
     if (this.detailSalesSelected == element.id) {
       this.detailSalesSelected = 0;
       this.clickedRows.clear();
     }
     else {
-      this.detailSalesSelected = element.id;
+      this.detailSalesSelected = element.id as number;
       this.clickedRows.clear();
       this.clickedRows.add(element);
     }
+  }
+
+  subTotalTransactionDetail(td: TransactionDetail) {
+    return Number(td.price) * Number(td.units);
   }
 
   changeSort(field: string) {
@@ -145,54 +166,79 @@ export class ClientDetailPage implements OnInit {
   renderSort() {
     const { direction, field } = this.sortState;
 
-    if (direction !== '') {
-      const sortFunction = (a: any, b: any) => {
-        if (field === 'date') {
+    if (direction == '') {
+      this.sortState = { field: 'date', direction: 'asc' };
+    }
+    const sortFunction = (a: any, b: any) => {
+      if (field === 'date') {
+        if (a.date == b.date) {
+          return direction === 'asc' ? a.id > b.id ? 1 : -1 : b.id > a.id ? 1 : -1
+        }
+        else {
           const dateA = moment(a.date, 'DD/MM/YYYY');
           const dateB = moment(b.date, 'DD/MM/YYYY');
           return direction === 'asc' ? dateA.isAfter(dateB) ? 1 : -1 : dateB.isAfter(dateA) ? 1 : -1;
-        } else if (field === 'price' || field === 'quantity') {
-          return direction === 'asc' ? a[field] - b[field] : b[field] - a[field];
-        } else if (field === 'transaction') {
-          return direction === 'asc' ? a[field].localeCompare(b[field]) : b[field].localeCompare(a[field]);
         }
-      };
+      } else if (field === 'price' || field === 'units' || field === 'balanceAfter') {
+        return direction === 'asc' ? a[field] - b[field] : b[field] - a[field];
+      } else if (field === 'transaction') {
+        return direction === 'asc' ? a.transactionType?.name.localeCompare((b.transactionType as TransactionType).name) : b.transactionType?.name.localeCompare((a.transactionType as TransactionType).name);
+      }
+    };
 
-      this.dataClientTransaction?.sort(sortFunction);
-    } else {
-      this.dataClientTransaction = this.dataClientTransactionOri;
-    }
+    this.transactionsOri?.sort(sortFunction);
+    this.setDataTransactionsCss(this.transactionsOri);
   }
 
-  showDateFilter = false;
-  filterDate = '';
-  dateFilterStart: any;
-  dateFilterEnd: any;
+  setDataTransactionsCss(transactions: Transaction[] | undefined) {
+    //Ordenar las transacciones por fecha
+    this.dataTransactionsCss = [];
+    transactions?.forEach((tx: Transaction) => {
+      console.log(tx);
+      const selectIndx = this.dataTransactionsCss.findIndex(dtcss => dtcss.date == tx.date);
+      if (selectIndx !== -1) {
+        this.dataTransactionsCss[selectIndx].transactions?.push(tx);
+      }
+      else {
+        this.dataTransactionsCss.push({
+          date: tx.date,
+          transactions: [tx]
+        });
+      }
+    });
+  }
 
-  confirmDateFilter() {
+  async confirmDateFilter() {
 
-    this.dataClientTransaction = this.dataClientTransactionOri?.filter((element => {
+    const loadingElement = await this.dialogService.showLoading();
 
-      if (this.dateFilterStart) {
+    this.renderSort();
+    const transactions = this.transactionsOri?.filter((element => {
+
+      if (this.filterDateStart) {
         const dateItem = moment(element.date, 'DD/MM/YYYY');
-
-        if (this.dateFilterEnd) {
-          return dateItem >= this.dateFilterStart && dateItem <= this.dateFilterEnd;
+        const dateStart = moment(this.filterDateStart);
+        if (this.filterDateEnd) {
+          const dateEnd = moment(this.filterDateEnd);
+          return dateItem >= dateStart && dateItem <= dateEnd;
         }
         else {
-          return dateItem >= this.dateFilterStart;
+          return dateItem >= dateStart;
         }
       }
       else return true;
     }));
+    this.setDataTransactionsCss(transactions);
 
-    this.renderSort();
+    loadingElement.dismiss();
+    this.showDateFilter = false;
   }
 
   clearDateFilter() {
-    this.dateFilterEnd = null;
-    this.dateFilterStart = null;
+    this.filterDateEnd = undefined;
+    this.filterDateStart = undefined;
     this.confirmDateFilter();
+    this.showDateFilter = false;
   }
 
   async openModalPay() {
@@ -238,27 +284,37 @@ export class ClientDetailPage implements OnInit {
     }
   }
 
-  addTransacction(data: any) {
+  async addTransacction(data: any) {
 
     const transactionIdToFind = data.transactionType;
     const transactionType = this.transactionTypes?.find(type => type.id === transactionIdToFind);
-
+    const userAuth = await this.storageService.getUserAuth() as UserAuth;
     const transactionDate = moment(data.transactionDate).format('DD/MM/YYYY');
 
     //se adicionan los datos al arreglo de transacciones
-    const element: ClientTransaction = {
-      id: this.dataClientTransactionOri ? this.dataClientTransactionOri.length + 1 : 1,
+    const price = Number(data.amount);
+    const clientBalance = this.client?.balance ?? 0;
+    const element: Transaction = {
+      id: new Date().getTime(),
       date: transactionDate,
-      transaction: transactionType ? transactionType.name : '',
-      quantity: data.quantity || 1,
-      price: Number(data.amount),
-      syncRequired: true,
-      paymentMethod: data.paymentMethod
+      transactionType: transactionType as TransactionType,
+      transaction_type_id: (transactionType as TransactionType).id,
+      units: data.units || 1,
+      client: this.client,
+      client_id: this.client?.id,
+      price: price,
+      balanceAfter: clientBalance + price,
+      balanceBefore: clientBalance,
+      paymentMethod: data.paymentMethod,
+      syncRequired: true
     }
-    this.dataClientTransactionOri?.push(element);
+    this.transactionsOri?.push(element);
+    this.renderSort();
+    this.setDataTransactionsCss(this.transactionsOri);
+    //this.clearDateFilter();
     this.closePopover();
     this.presentToast('top', 'Registro adicionado exitosamente');
-    this.renderSort();
+
     this.showTransactionDetail(element);
     setTimeout(() => {
       this.showElementInTable(element);
@@ -289,7 +345,7 @@ export class ClientDetailPage implements OnInit {
 
   @ViewChild(IonContent, { static: false }) content: IonContent | undefined;
 
-  showElementInTable(element: ClientTransaction) {
+  showElementInTable(element: Transaction) {
     // Realiza las acciones necesarias antes de mostrar el detalle
 
     // Desplaza el scroll hacia el elemento específico
@@ -302,4 +358,31 @@ export class ClientDetailPage implements OnInit {
       }
     }
   }
+
+  changeDateStart(event: any) {
+
+    const datetimeEl = event.target;
+    if (datetimeEl) {
+      const dateTime = moment(event.detail.value);
+      this.filterDateStart = dateTime.toDate();
+      const modal = datetimeEl.parentNode.parentElement;
+      if (modal) {
+        modal.dismiss();
+      }
+    }
+  }
+
+  changeDateEnd(event: any) {
+
+    const datetimeEl = event.target;
+    if (datetimeEl) {
+      const dateTime = moment(event.detail.value);
+      this.filterDateEnd = dateTime.toDate();
+      const modal = datetimeEl.parentNode.parentElement;
+      if (modal) {
+        modal.dismiss();
+      }
+    }
+  }
+
 }

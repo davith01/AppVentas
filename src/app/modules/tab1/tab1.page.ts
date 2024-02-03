@@ -1,75 +1,58 @@
 import { Component, OnInit } from '@angular/core';
-import { trigger, transition, animate, style, query, stagger } from '@angular/animations';
-import { NavController } from '@ionic/angular';
-import { Client, ClientService, ScreenSizeService } from '@app/services';
+import {  DialogService, PreloadService, ScreenSize, ScreenSizeService, StorageService } from '@app/services';
+import { Client, UserAuth, filterAnimation } from '@app/core';
+import { RedirectService } from '@app/services/redirect/redirect.service';
 
 @Component({
   selector: 'app-tab1',
   templateUrl: 'tab1.page.html',
   styleUrls: ['tab1.page.scss'],
-  animations: [
-
-    trigger('filterAnimation', [
-      transition(':enter, * => 0, * => -1', []),
-      transition(':increment', [
-        query(':enter', [
-          style({ opacity: 0, width: '0px' }),
-          stagger(50, [
-            animate('300ms ease-out', style({ opacity: 1, width: '*' })),
-          ]),
-        ], { optional: true })
-      ]),
-      transition(':decrement', [
-        query(':leave', [
-          stagger(50, [
-            animate('300ms ease-out', style({ opacity: 0, width: '0px' })),
-          ]),
-        ])
-      ]),
-    ]),
-  ]
+  animations: [filterAnimation]
 })
 export class Tab1Page implements OnInit {
 
-  _clientsFilter: Client[] = [];
-  clients: Client[] = [];
+  _clientsFilter: Client[] | undefined;
+  clients: Client[] | undefined;
   clientsTotal = -1;
   loading = false;
   isLandscape = false;
 
-
   constructor(
-    public navCtrl: NavController,
-    public clientService: ClientService,
-    private screenSizeService: ScreenSizeService
-    ) {
-  } 
+    private preloadService: PreloadService,
+    private storageService: StorageService,
+    private screenSizeService: ScreenSizeService,
+    private dialogService: DialogService,
+    private redirectService: RedirectService
+  ) {
+  }
 
   async ngOnInit() {
+
+    const loadingElement = await this.dialogService.showLoading();
+
+    this.isLandscape = this.screenSizeService.isLandscape;
     // Suscribe al observable del servicio para recibir actualizaciones sobre el tamaño de la pantalla
-    this.screenSizeService.isLandscape$.subscribe((isLandscape) => {
-      this.isLandscape = isLandscape;
+    this.screenSizeService.isLandscape$.subscribe((screenSize:ScreenSize) => {
+      this.isLandscape = screenSize.isLandscape;
     });
     
-    // this.pageSelectedEvent.setEvent('tabs/tab1');
-    const response = await this.clientService.listClients();
-    this.clients = response.data;
-    this._clientsFilter = response.data;
+    const userAuth = await this.storageService.getUserAuth() as UserAuth;
+    await this.preloadService.sync(userAuth);
+
+    this.clients = this._clientsFilter = await this.storageService.getClients(userAuth) as Client[];
+
     this.loading = true;
-  }
+    loadingElement.dismiss();
+  }  
 
   findClient(event: any) {
     const query = (event.target.value || '').trim().toLowerCase();
-    this._clientsFilter = query ? this.clients.filter(client => client.name.toLowerCase().includes(query)) : this.clients;
-    this.clientsTotal = query ? this._clientsFilter.length : -1;
+    this._clientsFilter = query ? this.clients?.filter(client => client?.name?.toLowerCase().includes(query)) : this.clients;
+    this.clientsTotal = query && this._clientsFilter ? this._clientsFilter.length : -1;
   }
-  
+
   goToClientDetail(clientId: any) {
-    this.navCtrl.navigateForward('client-detail', {
-      queryParams: {
-        clientId: clientId
-      },
-    });
+    this.redirectService.redirectTo('client-detail', { clientId: clientId });
   }
-  
+
 }

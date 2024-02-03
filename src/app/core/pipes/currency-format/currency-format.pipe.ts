@@ -7,7 +7,6 @@ import BigNumber from 'bignumber.js';
 })
 export class CurrencyFormatPipe implements PipeTransform {
   transform(value: any): string {
-
     return formatCurrencyExp(value);
   }
 }
@@ -37,16 +36,21 @@ export function formatCurrencyExp(numberT: any) {
   
     return formattedValue;*/
   if (numberT == undefined) return '$ 0';
-  
-  const numericValue = new BigNumber(numberT.toString().replace(/[^0-9]/g, '')).toNumber();
-  const formattedValue = new Intl.NumberFormat('es-CO', {
-    style: 'currency',
-    currency: 'COP',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0
-  }).format(numericValue);
+  try {
+    const numericValue = new BigNumber(numberT).toNumber();
+    const isNegative = numericValue < 0;
+    const formattedValue = new Intl.NumberFormat('es-CO', {
+      style: 'currency',
+      currency: 'COP',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    }).format(isNegative ? numericValue * -1 : numericValue);
+    return isNegative ? `( ${formattedValue} )` : formattedValue;
+  } catch (e) {
+    console.log(e);
+  }
+  return 'Error';
 
-  return formattedValue;
 }
 
 

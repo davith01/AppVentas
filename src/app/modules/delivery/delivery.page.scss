@@ -13,13 +13,12 @@
 }
 
 .cd-container::before {
-    /* this is the vertical line */
-    content: '';
+    content: "";
     position: absolute;
     top: 0;
-    left: 0;
+    left: 7rem;
     height: 4px;
-    width: 100%;
+    width: 80%;
     background: var(--color-timeline);
 }
 
@@ -31,14 +30,131 @@
     --border-width: 2px
 }
 
+.cd-container.portrait::before {
+    left: 0;
+    height: 4px;
+    width: 100%;
+}
+
+@media (orientation: portrait) and (max-width: 480px) {
+    .btn1,
+    .btn2,
+    .btn3,
+    .btn4,
+    .btn5 {
+        --padding-end: 0.5rem;
+        --padding-start: 0.5rem;
+    }
+}
+
+.cd-container.portrait {
+    .btn1 {
+        position: relative;
+        top: -1rem;
+    }
+
+    .btn2 {
+        position: relative;
+        top: 3.9rem;
+        right: 2rem;
+    }
+
+    .btn3 {
+        position: relative;
+        top: -1rem;
+        right: 2rem;
+    }
+
+    .btn4 {
+        position: relative;
+        top: 4rem;
+        right: calc(10% - 2rem);
+    }
+
+    .btn5 {
+        position: relative;
+        top: 1.2rem;
+    }
+
+    @media only screen and (max-width: 420px) {
+        .btn3 {
+            right: -1rem;
+        }
+
+        .btn4 {
+            right: 4rem;
+        }
+
+        .btn5 {
+            position: relative;
+            top: 3.9rem;
+            right: 3.7rem;
+        }
+
+        .btn5.client-bag {
+            right: 3.7rem;
+        }
+
+        .btn5.item-bag {
+            right: 4.9rem;
+        }
+
+        .btn5::before {
+            content: "";
+            position: absolute;
+            top: -1rem;
+            left: 29px;
+            height: 100%;
+            width: 3px;
+            background: var(--color-timeline);
+        }
+    }
+
+    @media only screen and (max-width: 365px) {
+        .btn3 {
+            right: 1.1rem;
+        }
+
+        .btn5 {
+            right: 5.9rem;
+        }
+
+        .btn5.client-bag {
+            right: 5.8rem;
+        }
+
+        .btn5.item-bag {
+            right: 7rem;
+        }
+    }
+
+    .btn1::before,
+    .btn2::before,
+    .btn3::before,
+    .btn4::before {
+        content: "";
+        position: absolute;
+        top: 13px;
+        left: 28px;
+        height: 100%;
+        width: 3px;
+        background: var(--color-timeline);
+    }
+
+    .btn2::before,
+    .btn4::before {
+        top: -1rem;
+    }
+}
+
+.cd-container.portrait::before {
+    top: 23px;
+}
+
 .button-section.disabled::part(native) {
     background: white;
 }
 
-.button-section.small {
-    --padding-end: 0.5rem;
-    --padding-start: 0.5rem;
-}
 
 .padding-top-0 {
     padding-top: 0;
@@ -170,16 +286,16 @@ ion-checkbox::part(container) {
 
     font-size: .8rem;
 
-    .item-class {
-        background-color: #DDEBF7;
+    .item-row {
         text-transform: uppercase;
+        font-weight: 500;
     }
 
     .head-row {
         text-transform: uppercase;
-        background-color: #FFA500;
-        color: #fafafa;
-        font-weight: bold;
+        background-color: var(--ion-color-warning);
+        color: var(--ion-color-warning-contrast);
+        font-weight: 500;
         text-align: center;
         border-top-left-radius: 0.5rem;
         border-top-right-radius: 0.5rem;
@@ -243,22 +359,34 @@ ion-checkbox::part(container) {
     }
 }
 
-.button-next-form::part(native){
+.button-next-form::part(native) {
     padding-left: 0;
 }
 
 .legend {
     margin-top: -1rem;
-    display: flex;
 
     h6 {
-        margin-top: 1.2rem !important;
-        color: gray;
-        font-style: italic;
-        margin-left: 1rem;
+        margin-top: 0.2rem !important;
     }
 }
 
+
+.title-float {
+    position: absolute;
+    top: -0.6rem;
+    left: 100%;
+    width: 100%;
+    transform: translateX(-100%);
+}
+
+.price-float {
+    position: absolute;
+    top: 1.3rem;
+    left: 100%;
+    width: 100%;
+    transform: translateX(-100%);
+}
 
 .pagination-site-back::before,
 .pagination-site-next::before {
@@ -267,6 +395,7 @@ ion-checkbox::part(container) {
     top: 50%;
     border-style: solid;
     opacity: 0.25;
+    z-index: 10;
 }
 
 .pagination-site-back::before {
@@ -284,9 +413,9 @@ ion-checkbox::part(container) {
 
 .icon-plus {
     position: absolute;
-    left: -2.26rem;
+    left: -2rem;
     font-size: 1.4rem;
-    color: gray;
+    top: 0.3rem;
 }
 
 .icon-plus-line {
@@ -301,4 +430,20 @@ ion-checkbox::part(container) {
     height: 100%;
     width: 2px;
     background: lightgray;
+}
+
+.icon-plus.small {
+    font-size: 3rem;
+    top: -0.7rem;
+    left: -2rem;
+}
+
+.pagination-site-next.highlight::before {
+    box-shadow: -11px 0 19px 2px #ffcc00;
+    border-color: transparent transparent transparent #ffcc00;
+}
+
+.pagination-site-back.highlight::before {
+    box-shadow: 8px 0 19px 2px #ffcc00;
+    border-color: transparent #ffcc00 transparent transparent;
 }

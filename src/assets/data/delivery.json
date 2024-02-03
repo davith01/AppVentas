@@ -1,0 +1,55 @@
+[
+  { "id":1,
+    "date": "01/01/2023",
+    "items": [
+      { "id":1,"name": "Buenas", "units":1,"price": "35000", "clients":[{"client":11}] },
+      { "id":2,"name": "Segundas", "units":3, "price": "30000" ,"clients":[{"client":12}] },
+      { "id":3,"name": "Maduras",  "units":44,"price": "25000","clients":[{"client":13}]  },
+      { "id":4,"name": "Picas",  "units":4,"price": "20000","clients":[{"client":14}]  }
+    ],
+    "provider": [{"id": 1}],
+    "description": "SKU-918",
+    "units": "52",
+    "totalPrice": "110000",
+    "transactionType": {
+      "id": 1,
+      "name": "Venta de Platanos",
+      "icon":"newspaper-outline"
+    }
+  },
+  {  "id": 2,
+    "date": "05/12/2023",
+    "items": [
+      { "id":1,"name": "Buenas", "units":1, "price": "35000", "clients":[{"client":11}] },
+      { "id":2,"name": "Segundas","units":1, "price": "30000" ,"clients":[{"client":12}] },
+      { "id":3,"name": "Maduras","units":1, "price": "25000","clients":[{"client":13}]  },
+      { "id":4,"name": "Picas", "units":1,"price": "25000","clients":[{"client":14}]  }
+    ],
+    "units": "4",
+    "totalPrice": "110000",
+    "description":"SKU-9183",
+    "provider": [{"id": 3},{"id": 4}],
+    "transactionType": {
+      "id": 1,
+      "name": "Venta de Platanos",
+      "icon":"newspaper-outline"
+    }
+  },
+  { "id": 3,
+    "date": "31/12/2023",
+    "description": "Reparto",
+    "provider": [{ "id": 2 }],
+    "items": [
+      { "id":1,"name": "Buenas", "units":11,"price": "35000", "clients":[{"client":31}] },
+      { "id":2,"name": "Segundas","units":31, "price": "30000" ,"clients":[{"client":32}] },
+      { "id":3,"name": "Maduras", "units":88,"price": "25000","clients":[{"client":33}]  }
+    ],
+    "units": "120",
+    "totalPrice": "90000",
+    "transactionType": {
+      "id": 1,
+      "name": "Venta de Platanos",
+      "icon":"newspaper-outline"
+    }
+  }
+]

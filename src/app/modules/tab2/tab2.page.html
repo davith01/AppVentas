@@ -1,64 +1,136 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
     <ion-buttons slot="start">
-      <ion-menu-button></ion-menu-button>
       <app-icon-logo></app-icon-logo>
     </ion-buttons>
     <ion-title>Lista de viajes</ion-title>
     <ion-buttons slot="end">
-      <ion-button class="button-new" fill="clear" size="small" (click)="newDelivery()" id="click-trigger">
+      <ion-button class="button-new" fill="clear" size="small" (click)="goToNewDelivery()">
         Nuevo viaje
         <ion-icon slot="end" name="add-circle-outline"></ion-icon>
       </ion-button>
+      <ion-menu-button></ion-menu-button>
     </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
 <ion-content [fullscreen]="true" color="light">
 
-  <section id="cd-timeline" class="cd-container">
-    <div *ngFor="let activity of timeline">
-      <div class="cd-timeline-block">
-        <div class="cd-timeline-icon" [ngStyle]="{'background-color': activity.click ? activity.provider.color : ''}">
-          <ion-icon *ngIf="!activity.click" (click)="activity.click = !activity.click" aria-hidden="true"
-            [name]="activity.icon"></ion-icon>
-          <span *ngIf="activity.click" (click)="activity.click = !activity.click">{{ activity.provider | Alias}}</span>
-        </div>
-        <div class="cd-timeline-content">
-          <h5 class="card-title">{{activity.transactionType.name}} - {{activity.provider.name}}</h5>
-          <small>
-            <span class="cd-author">
-              Fecha: {{activity.date | Fecha}}
-            </span>
-            <span class="timelineText">
-              Unidades: {{activity.units}}
-              Total: {{activity.total | COP}}
-            </span>
-            <br />
-          </small>
+  <div class="display-flex color-gray margin-left-1 margin-top-1" (click)="showDateFilter = !showDateFilter">
+    <ion-icon name="funnel-outline" class="filter-icon"></ion-icon>
+    <ion-icon class="margin-top-03" [name]="showDateFilter ? 'caret-down-outline' : 'caret-forward-outline'"></ion-icon>
+  </div>
 
-          <ion-grid *ngIf="activity.subTotals" class="table">
-            <ion-row class="row-head">
-              <ion-col>Clase</ion-col>
-              <ion-col>Unidades</ion-col>
-              <ion-col>SubTotal</ion-col>
-            </ion-row>
-            <ion-row class="row-body" *ngFor="let subTotal of activity.subTotals">
-              <ion-col>{{subTotal.type}}</ion-col>
-              <ion-col>{{subTotal.unit}}</ion-col>
-              <ion-col class="text-align-right">{{subTotal.total | COP}}</ion-col>
-            </ion-row>
-            <ion-row class="row-foot">
-              <ion-col>Total</ion-col>
-              <ion-col>{{activity.units}}</ion-col>
-              <ion-col class="text-align-right">{{activity.total | COP}}</ion-col>
-            </ion-row>
-          </ion-grid>
-
-        </div>
+  <ion-grid class="container-filter color-gray" *ngIf="showDateFilter" @fadeAnimation>
+    <ion-row>
+      <ion-col [size]="isLandscape ? 6 : 12">
+        <ion-select mode="md" subHeader="Lista de Proveedores" interface="popover" label="Proveedor"
+          [(ngModel)]="selectedFilterProvider" label-placement="floating" fill="outline">
+          <ion-select-option *ngFor="let provider of providers" [value]="provider">{{provider.name}}</ion-select-option>
+        </ion-select>
+      </ion-col>
+      <ion-col [size]="isLandscape ? 6 : 12">
+        <ion-select mode="md" label="Cliente" [(ngModel)]="selectedFilterClient" label-placement="floating"
+          fill="solid">
+          <ion-select-option *ngFor="let client of clients" value="{{client.id}}">{{client.name}}</ion-select-option>
+        </ion-select>
+      </ion-col>
+    </ion-row>
+    <ion-row>
+      <div class="line-top margin-auto margin-top-1">
+        Seleccione las fechas
       </div>
-    </div>
-  </section>
+      <ion-col [size]="isLandscape ? 6 : 12">
+        <ion-row>
+          <ion-col>
+            Desde
+            <ion-datetime-button [ngClass]="{'empty':!filterDateStart}" datetime="datetime-start"></ion-datetime-button>
+            <ion-modal [keepContentsMounted]="true">
+              <ng-template>
+                <ion-datetime presentation="date" (ionChange)="changeDateStart($event)"
+                  id="datetime-start"></ion-datetime>
+              </ng-template>
+            </ion-modal>
+          </ion-col>
+          <ion-col>
+            Hasta
+            <ion-datetime-button [ngClass]="{'empty':!filterDateEnd}" datetime="datetime-end"></ion-datetime-button>
+            <ion-modal [keepContentsMounted]="true">
+              <ng-template>
+                <ion-datetime presentation="date" (ionChange)="changeDateEnd($event)" id="datetime-end"></ion-datetime>
+              </ng-template>
+            </ion-modal>
+          </ion-col>
+        </ion-row>
+      </ion-col>
+      <ion-col size="12" class="display-flex">
+        <ion-checkbox [(ngModel)]="selectedFilterToday">Sólo hoy</ion-checkbox>
+        <div class="ion-text-end width-100">
+          <ion-button class="clear-date-filter margin-left-auto" size="small" fill="outline" color="primary"
+            (click)="confirmDateFilter()">
+            Filtar
+          </ion-button>
+          <ion-button class="clear-date-filter margin-left-1" size="small" fill="outline" color="medium"
+            (click)="clearDateFilter()">
+            Limpiar
+          </ion-button>
+        </div>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+
+
+  <ion-searchbar show-clear-button="always" placeholder="Buscar Viaje"
+    (ionInput)="findDeliverySearch($event)"></ion-searchbar>
+
+  <ion-grid class="time-line" *ngIf="loading">
+    <ion-row>
+      <ion-col (click)="goToDelivery(deliveryCss.delivery)" [size]="isLandscape ? 6 : 12" *ngFor="let deliveryCss of _deliveryCssFilter">
+        <div class="cd-timeline-block">
+          <div class="cd-timeline-content">
+            <h5 class="margin-0 padding-0">{{deliveryCss.delivery.transactionType?.name}} - {{ getProvidersName(deliveryCss.delivery.providers)}}</h5>
+            <p>
+              Fecha: {{deliveryCss.delivery.date | Fecha}} {{ deliveryCss.delivery.description}}
+            </p>
+
+            <ion-grid *ngIf="deliveryCss.totalDetails" class="table">
+              <ion-row class="row-head">
+                <ion-col>Categoría</ion-col>
+                <ion-col>Unidades</ion-col>
+                <ion-col>SubTotal</ion-col>
+              </ion-row>
+              <ion-row class="row-body" *ngFor="let transaction of deliveryCss.totalDetails">
+                <ion-col>{{transaction.productCatalog.name}}</ion-col>
+                <ion-col>{{transaction.subTotalUnits}}</ion-col>
+                <ion-col class="text-align-right">{{ transaction.subTotalPrice | COP}}</ion-col>
+              </ion-row>
+              <ion-row class="row-foot">
+                <ion-col>Total</ion-col>
+                <ion-col>{{deliveryTotalUnits(deliveryCss.delivery)}}</ion-col>
+                <ion-col class="text-align-right">{{deliveryTotalPrice(deliveryCss.delivery) | COP}}</ion-col>
+              </ion-row>
+            </ion-grid>
+          </div>
+        </div>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+
+  <ion-grid *ngIf="!loading">
+    <ion-row>
+      <ion-col [size]="isLandscape ? 5 : 12">
+        <ion-skeleton-text [animated]="true" style="width: 100%;"></ion-skeleton-text>
+      </ion-col>
+      <ion-col [size]="isLandscape ? 5 : 12">
+        <ion-skeleton-text [animated]="true" style="width: 100%;"></ion-skeleton-text>
+      </ion-col>
+      <ion-col [size]="isLandscape ? 5 : 12">
+        <ion-skeleton-text [animated]="true" style="width: 100%;"></ion-skeleton-text>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+
+
 
   <div *ngFor="let item of list">
     <ion-card>

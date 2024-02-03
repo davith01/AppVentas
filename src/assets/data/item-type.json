@@ -1,0 +1,19 @@
+[
+    {
+      "id": 1,
+      "name": "Buenas",
+      "price": 35000
+    },
+    {
+      "id": 2,
+      "name": "Picadas"
+    },
+    {
+      "id": 3,
+      "name": "Regulares"
+    },
+    {
+      "id": 4,
+      "name": "Medio buenas"
+    }
+  ]

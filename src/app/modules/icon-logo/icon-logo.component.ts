@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { SafeHtml, DomSanitizer } from '@angular/platform-browser';
 import { StorageService } from '@app/services';
 import { environment } from '@env/environment';
@@ -8,20 +8,28 @@ import { environment } from '@env/environment';
   templateUrl: './icon-logo.component.html',
   styleUrls: ['./icon-logo.component.scss'],
 })
-export class IconLogoComponent  implements OnInit {
+export class IconLogoComponent implements OnInit {
   urlIcon: string = '';
   urlIconHtml: SafeHtml | undefined;
+  @Input() ngClass: string | undefined;
+  @Input() margin: string = 'auto';
+  @Input() borderRadius: string = '0';
+  @Input() height: string = '6rem';
+  @Input() fullstyle: boolean = false;
+  @Input() src: string | undefined;
 
-  constructor(    
+  param : any;
+  constructor(
     private storageService: StorageService,
     private sanitizer: DomSanitizer
-  ) { }
+  ) {
+     
+  }
 
   async ngOnInit() {
-    this.urlIcon = await this.storageService.getUrlIcon();
-    this.urlIcon = this.urlIcon || environment.urlIcon;
-    this.urlIconHtml = this.sanitizer.bypassSecurityTrustUrl(this.urlIcon);
-
+    this.storageService.getUrlIcon().subscribe((urlIcon) => {
+      this.urlIconHtml = this.sanitizer.bypassSecurityTrustUrl(urlIcon || environment.urlIcon);
+    });
   }
 
 }

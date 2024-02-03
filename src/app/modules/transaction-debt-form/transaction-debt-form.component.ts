@@ -1,7 +1,8 @@
 // transaction-form.component.ts
 import { Component, ElementRef, HostListener, Input, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { DetailSales, TransactionType, TransactionTypeService } from '@app/services';
+import { TransactionDetail, TransactionType, UserAuth } from '@app/core';
+import { StorageService } from '@app/services';
 import { ModalController } from '@ionic/angular';
 import * as moment from 'moment';
 
@@ -20,33 +21,30 @@ export class TransactionDebtFormComponent implements OnInit {
   showDateTransaction = true;
   transactionTypes: TransactionType[] | undefined;
   transactionSelect: TransactionType | undefined;
-  elementDetails: DetailSales[] = [
-    { "date": "", "category": "", "quantity": 1, "unitPrice": 0 },
-    { "date": "", "category": "", "quantity": 1, "unitPrice": 0 },
-    { "date": "", "category": "", "quantity": 1, "unitPrice": 0 }
-  ];
+  transactionDetail: TransactionDetail[] | undefined ;
   categoryDetails = ['buenas', 'picadas', 'segundarias'];
 
   constructor(
     private formBuilder: FormBuilder,
     private modalCtrl: ModalController,
-    private transactionTypeService: TransactionTypeService
+    private storageService: StorageService
   ) {
     const currentDate: moment.Moment = moment();
     this.transactionForm = this.formBuilder.group({
       transactionType: ['', Validators.required],
       transactionDate: [currentDate.format('YYYY-MM-DD'), Validators.required],
       amount: [''],
-      quantity: [''],
+      units: [''],
       comment: ['']
     });
   }
 
   async ngOnInit() {
 
-    const transactionList = await this.transactionTypeService.getList();
-    this.transactionTypes = transactionList.filter((transaction: TransactionType) => {
-      return transaction.typeTransaction == this.typeTransaction;
+    const userAuth = await this.storageService.getUserAuth() as UserAuth;
+    const transactionTypes = await this.storageService.getTransactionTypes(userAuth) as TransactionType[];
+    this.transactionTypes = transactionTypes.filter((transaction: TransactionType) => {
+      return transaction.targetType == this.typeTransaction;
     });
 
   }
@@ -57,6 +55,11 @@ export class TransactionDebtFormComponent implements OnInit {
     //const result = formatISO(new Date(this.callDate))
     const modal = event.target.parentNode.parentElement;
     if (datetime && modal) {
+      [
+        {  "category": "", "units": 1, "price": 0 },
+        {  "category": "", "units": 1, "price": 0 },
+        {  "category": "", "units": 1, "price": 0 }
+      ];
       modal.dismiss();
     }
   }
@@ -88,10 +91,10 @@ export class TransactionDebtFormComponent implements OnInit {
   }
 
   newDetailSales() {
-    const newDetail: DetailSales =
-      { "date": "", "category": "Bolsas Segundas", "quantity": 1, "unitPrice": 0 };
+    const newDetail: TransactionDetail =
+      {  "units": 1, "price": 0 };
 
-    this.elementDetails.push(newDetail);
+    this.transactionDetail?.push(newDetail);
   }
 
   transactionChange() {

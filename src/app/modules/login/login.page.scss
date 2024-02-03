@@ -53,3 +53,80 @@ h3 {
         font-size: 1rem;
     }
 }
+
+.avatar-color {
+    padding: 1.1rem;
+    border-radius: 100%;
+
+    span {
+        position: absolute;
+        top: 1.2rem;
+        margin-left: -0.4rem;
+        font-size: 1.2rem;
+    }
+}
+
+.modal-finger-close {
+    position: relative;
+}
+
+.block {
+    width: 100%;
+    height: 300px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+ion-modal {
+    --height: auto;
+}
+
+.finger-print-hidden {
+    opacity: 0;
+    height: 0;
+}
+
+
+.login-message {
+    color: gray;
+    position: relative;
+    display: inline-block;
+    font-size: 0.9rem;
+}
+
+.login-message::before,
+.login-message::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    width: 50%;
+    height: 1px;
+    background-color: gray;
+}
+
+.login-message::before {
+    left: 0;
+    transform: translateX(-120%);
+}
+
+.login-message::after {
+    right: 0;
+    transform: translateX(120%);
+}
+
+form {
+
+    ion-input,
+    ion-button {
+        max-width: 18rem;
+        margin: auto;
+    }
+}
+
+.config-button {
+    position: absolute;
+    left: 2rem;
+    font-size: 1.5rem;
+    color: lightgray;
+}

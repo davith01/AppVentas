@@ -12,7 +12,7 @@ import { HttpClientModule } from '@angular/common/http';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { ComponentsModule } from './components.module';
 import { CloudinaryModule } from '@cloudinary/ng';
-import { FingerprintAIO } from '@awesome-cordova-plugins/fingerprint-aio';
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 
 @NgModule({
   declarations: [AppComponent],
@@ -27,14 +27,14 @@ import { FingerprintAIO } from '@awesome-cordova-plugins/fingerprint-aio';
     AppRoutingModule,
     ComponentsModule,
     CloudinaryModule,
+    FontAwesomeModule
   ],
   providers: [
     { provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
     {
       provide: ErrorHandler,
       useClass: GlobalErrorHandlerService,
-    },
-    FingerprintAIO 
+    } 
   ],
   bootstrap: [AppComponent],
   schemas: [ CUSTOM_ELEMENTS_SCHEMA]
